@@ -1,0 +1,3 @@
+class ForumTopic < DomainModel
+
+end

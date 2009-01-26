@@ -1,0 +1,3 @@
+class ForumSubscription < DomainModel
+
+end
