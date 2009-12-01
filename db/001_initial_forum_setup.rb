@@ -13,21 +13,25 @@ class InitialForumSetup < ActiveRecord::Migration
       t.integer :end_user_id
       t.string :posted_by
       t.string :subject
-      t.text :body
+      t.text :body, :limit => 2.megabytes
+      t.text :body_html, :limit => 2.megabytes
+      
+      t.column :posted_at, :datetime
+      t.column :edited_at, :datetime
     end
     
-    add_index :forum_topics, [ :forum_id ], :forum_id
+    add_index :forum_topics, [ :forum_id ], :name => 'forum_id'
     
     create_table :forum_posts, :force => true do |t|
       t.integer :forum_topic_id
       t.integer :end_user_id
       t.string :posted_by
       t.string :subject
-      t.text :body
-      t.text :body_html
+      t.text :body, :limit => 2.megabytes
+      t.text :body_html, :limit => 2.megabytes
       
-      t.column :posted_at
-      t.column :edited_at
+      t.column :posted_at, :datetime
+      t.column :edited_at, :datetime
     end
     
     add_index :forum_posts, [ :forum_topic_id, :posted_at ], :name => 'topic_posted'
