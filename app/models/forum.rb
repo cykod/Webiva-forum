@@ -1,3 +1,0 @@
-class Forum < DomainModel
-
-end

@@ -1,7 +1,7 @@
 class Forum::AdminController < ModuleController
   permit 'editor'
   
-  component_info 'Forum', :description => 'Add Forums', 
+  component_info 'Forum', :description => 'Add Forums to your website', 
                               :access => :private
                               
   content_model :forums
@@ -22,36 +22,36 @@ class Forum::AdminController < ModuleController
     
     @mod.options = {} unless @mod.options.is_a?(Hash)
   end
-                     
+
+  
   public     
 
-   def self.get_forum_info
-      Forum.find(:all, :order => 'name').collect do |forum| 
-          {:name => forum.name + " " + "Forum".t ,:url => { :controller => '/forum/manage', :path => blog.id } ,:permission => 'forum_manage', :icon => 'icons/content/blog.gif' }
-      end 
+   def self.get_forums_info
+      ForumForum.find(:all, :order => 'name',:conditions => 'main_page=1').collect do |forum| 
+       {:name => forum.name + " " + "Forum".t ,
+         :url => { :controller => '/forum/manage', :action=>'forum', :path => forum.id } ,
+         :permission => { :model => forum, :permission => :admin_permission, :base => :forum_manage },
+         :icon => 'icons/content/blog.gif' }
+     end + [  { :name => 'Manage Forums',
+       :url => { :controller => '/forum/manage' },
+       :permission => :forum_manage,
+       :icon => 'icons/content/blog.gif' } ]
   end
                
-#  def options
-#    cms_page_info [ ["Options",url_for(:controller => '/options') ], ["Modules",url_for(:controller => "/modules")], "Blog Module Options "], "options"
-#    get_module
-#    
-#    options = @mod.options 
-#    
-#  end
-
-  def create
-    cms_page_info [ ["Content",url_for(:controller => '/content') ], "Create a new Forum"], "content"
-    get_module
+   def options
+     cms_page_path ['Options','Modules'],'Forum Options'
     
-    @forum = Forum.new(params[:forum])
-
-    if(request.post? && params[:forum])
-      if(@forum.save)
-        redirect_to :controller => '/forum/manage', :path => @blog.id
-        return 
-      end
-    end
-
+    @options = self.class.module_options(params[:options])
+    
+    if request.post? && params[:options] && @options.valid?
+      Configuration.set_config_model(@options)
+      flash[:notice] = "Updated forum module options".t 
+      redirect_to :controller => '/modules'
+      return
+    end    
+  
+  
   end
+
   
 end
