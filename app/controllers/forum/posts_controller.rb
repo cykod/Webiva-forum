@@ -1,0 +1,83 @@
+
+
+class Forum::PostsController < ModuleController
+  before_filter :find_forum_category, :find_forum, :find_topic, :find_post
+
+  helper 'forum/path'
+
+  permit 'forum_manage'
+
+  component_info 'Forum'
+
+  # need to include 
+  include ActiveTable::Controller
+  active_table :post_table,
+                ForumPost,
+                [ hdr(:icon, '', :width=>10),
+                  hdr(:string, 'forum_posts.posted_by'),
+                  hdr(:static, 'Post')
+                ]
+
+  cms_admin_paths 'content', 
+                  'Content' => { :controller => '/content' }
+
+  def list
+    posts_path @topic.subject
+    post_table(false)
+  end
+
+  def post_table(display=true)
+    if(request.post? && params[:table_action] && params[:post].is_a?(Hash)) 
+      
+      case params[:table_action]
+      when 'delete':
+	  params[:post].each do |entry_id,val|
+          ForumPost.destroy(entry_id.to_i)
+	end
+      end
+    end
+    
+    @active_table_output = post_table_generate params, :order => 'forum_posts.posted_at DESC', :conditions => ['forum_posts.forum_topic_id = ?',@topic.id ]
+
+    render :partial => 'post_table' if display
+  end
+
+  def post
+    if @post.nil?
+      @post = @topic.build_post(:subject => @topic.default_subject)
+      posts_path 'Create a new Post'.t
+    else
+      posts_path 'Update Post'.t
+    end
+
+    if request.post? && params[:post]
+      if @post.update_attributes(params[:post])
+	redirect_to posts_list_url_for
+      end
+    end
+  end
+
+  private
+  module PostsModule
+    include  Forum::TopicsController::TopicsModule
+
+    def find_post
+      @post ||= @topic.forum_posts.find(params[:path][3]) if params[:path][3]
+    end
+
+    def build_posts_base_path
+      base = build_topics_base_path
+      if ! @post.nil?
+	base << [ '%s', posts_list_url_for, @topic.subject ]
+      end
+      base
+    end
+  end
+
+  include PostsModule
+
+  def posts_path(path, url=nil)
+    base = build_posts_base_path
+    cms_page_path base, ['%s', url, path]
+  end
+end

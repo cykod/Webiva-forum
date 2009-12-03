@@ -1,0 +1,18 @@
+<script>
+<%=  active_table_javascript %>
+</script>
+
+<% action_panel do |p| -%>
+  <%= p.link "Create a new Post", :action => 'post', :path => [@forum_category.id, @forum.id, @topic.id], :icon => 'add.gif' %>
+  <%= p.link "Edit Topic", :controller => '/forum/topics', :action => 'topic', :path => [@forum_category.id, @forum.id, @topic.id], :icon => 'edit.gif' %>
+<% end -%>
+
+
+<hr/>
+
+
+<div class='admin_content'>
+<div id='post_table'>
+<%= render :partial => 'post_table' %>
+</div>
+</div>

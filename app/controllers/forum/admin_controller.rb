@@ -1,12 +1,16 @@
 class Forum::AdminController < ModuleController
-  permit 'editor'
+  before_filter :find_forum_category, :only => 'configure'
+
+  helper 'forum/path'
+
+  permit 'forum_config'
   
-  component_info 'Forum', :description => 'Add Forums', 
-                              :access => :private
+  component_info 'Forum', :description => 'Add Forums to your website', 
+                          :access => :private
                               
   content_model :forums
   
-  content_action  'Create a new Forum', { :controller => '/forum/admin', :action => 'create' } 
+  content_action  'Create a new Forum Category', { :controller => '/forum/admin', :action => 'create' } 
 
   register_permission_category :forum, "Forum" ,"Permissions for Writing to and Managing Forums"
   
@@ -16,42 +20,78 @@ class Forum::AdminController < ModuleController
                                 [ :search, 'Can Search', 'Can Search Forums' ]
                              ]
 
-  private
-  def get_module
-    @mod = SiteModule.get_module('forum')
-    
-    @mod.options = {} unless @mod.options.is_a?(Hash)
-  end
-                     
+  cms_admin_paths "options",
+                  'Content' => { :controller => '/content' },
+                  'Options' =>   { :controller => '/options' },
+                  'Modules' =>  { :controller => '/modules' },
+                  'Forum Options' => { :action => 'options' }
+
   public     
 
-   def self.get_forum_info
-      Forum.find(:all, :order => 'name').collect do |forum| 
-          {:name => forum.name + " " + "Forum".t ,:url => { :controller => '/forum/manage', :path => blog.id } ,:permission => 'forum_manage', :icon => 'icons/content/blog.gif' }
-      end 
+  def self.get_forums_info
+    ForumCategory.find(:all, :order => 'weight, name').collect do |category| 
+      {:name => "%s Forums" / category.name,
+	:url => { :controller => '/forum/manage', :action=>'category', :path => category.id } ,
+	:permission => { :model => category, :permission => :admin_permission, :base => :forum_manage },
+	:icon => 'icons/content/blog.gif' }
+    end
   end
-               
-#  def options
-#    cms_page_info [ ["Options",url_for(:controller => '/options') ], ["Modules",url_for(:controller => "/modules")], "Blog Module Options "], "options"
-#    get_module
-#    
-#    options = @mod.options 
-#    
-#  end
+  
+  def options
+    cms_page_path ['Options','Modules'], 'Forum Options'
+    
+    @options = self.class.module_options(params[:options])
+    
+    if request.post? && @options.valid?
+      Configuration.set_config_model(@options)
+      flash[:notice] = "Updated forum module options".t 
+      redirect_to :controller => '/modules'
+      return
+    end    
+  end
 
   def create
-    cms_page_info [ ["Content",url_for(:controller => '/content') ], "Create a new Forum"], "content"
-    get_module
+    cms_page_path ['Content'], 'Create a new Forum Category'
     
-    @forum = Forum.new(params[:forum])
+    @forum_category = ForumCategory.new(params[:forum_category])
 
-    if(request.post? && params[:forum])
-      if(@forum.save)
-        redirect_to :controller => '/forum/manage', :path => @blog.id
+    if(request.post? && params[:forum_category])
+      if(@forum_category.save)
+        redirect_to forum_category_url_for
         return 
       end
     end
 
   end
+
+  def configure
+    cms_page_path ['Content'], ['%s Forums', forum_category_url_for, @forum_category.name]
+    
+    if(request.post? && @forum_category && params[:forum_category])
+      if(@forum_category.update_attributes(params[:forum_category]))
+        redirect_to forum_category_url_for
+        return 
+      end
+    end
+  end
+
+  def self.module_options(vals=nil)
+    Configuration.get_config_model(Options,vals)
+  end
   
+
+  class Options < HashModel
+    
+    
+  end
+  
+  module AdminModule
+    include Forum::PathHelper
+
+    def find_forum_category
+      @forum_category ||= ForumCategory.find(params[:path][0])
+    end
+  end
+
+  include AdminModule
 end

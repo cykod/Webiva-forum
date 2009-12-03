@@ -1,0 +1,18 @@
+<script>
+<%=  active_table_javascript %>
+</script>
+
+<% action_panel do |p| -%>
+  <%= p.link "Create a new Forum", :action => 'forum', :path => @forum_category.id, :icon => 'add.gif' %>
+  <%= p.link "Configure Forum Category", :controller => '/forum/admin', :action => 'configure', :path => @forum_category.id, :icon => 'edit.gif' %>
+<% end -%>
+
+
+<hr/>
+
+
+<div class='admin_content'>
+<div id='forum_table'>
+<%= render :partial => 'forum_table' %>
+</div>
+</div>
