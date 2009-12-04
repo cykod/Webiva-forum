@@ -49,7 +49,7 @@ class Forum::TopicsController < ModuleController
 
   def topic
     if @topic.nil?
-      @topic = @forum.forum_topics.build
+      @topic = @forum.forum_topics.build :end_user => myself
       topics_path 'Create a new Topic'.t
     else
       topics_path @topic.subject, posts_list_url_for

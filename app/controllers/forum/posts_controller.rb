@@ -14,6 +14,8 @@ class Forum::PostsController < ModuleController
   active_table :post_table,
                 ForumPost,
                 [ hdr(:icon, '', :width=>10),
+                  hdr(:icon, '', :width=>28),
+                  hdr(:options, 'forum_posts.approved', :options => [['Approved',1],['Rejected',0]], :icon => 'icons/table_actions/rating_none.gif', :width => '32'),
                   hdr(:string, 'forum_posts.posted_by'),
                   hdr(:static, 'Post')
                 ]
@@ -42,7 +44,7 @@ class Forum::PostsController < ModuleController
 	  post.save
 	end
 
-      when 'disapprove':
+      when 'reject':
 	  params[:post].each do |entry_id,val|
 	  post = ForumPost.find(entry_id.to_i)
 	  post.approved = false
@@ -59,7 +61,7 @@ class Forum::PostsController < ModuleController
 
   def post
     if @post.nil?
-      @post = @topic.build_post(:subject => @topic.default_subject)
+      @post = @topic.build_post(:subject => @topic.default_subject, :end_user => myself)
       posts_path 'Create a new Post'.t
     else
       posts_path 'Update Post'.t
