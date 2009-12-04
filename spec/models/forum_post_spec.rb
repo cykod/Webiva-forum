@@ -94,13 +94,32 @@ describe ForumPost do
       @topic.forum_posts.size.should == 1
       @topic.activity_count.should == 1
 
-      @post = create_forum_post(@topic, 'test post', {:posted_by => 'Test User2'})
+      @post = create_forum_post(@topic, 'test post', {:posted_by => 'Test User 2'})
       @post.save.should be_true
       @topic.reload
       @topic.forum_posts.size.should == 2
       @topic.activity_count.should == 2
 
       @post.update_attributes :approved => false
+      @topic.reload
+      @topic.forum_posts.size.should == 1
+      @topic.activity_count.should == 2
+    end
+
+    it "should decrement forum_posts_count for destroy posts" do
+      @post = create_forum_post_with_end_user(@topic, @user)
+      @post.save.should be_true
+      @topic.reload
+      @topic.forum_posts.size.should == 1
+      @topic.activity_count.should == 1
+
+      @post = create_forum_post(@topic, 'test post to destroy', {:posted_by => 'Test User 3'})
+      @post.save.should be_true
+      @topic.reload
+      @topic.forum_posts.size.should == 2
+      @topic.activity_count.should == 2
+
+      @post.destroy
       @topic.reload
       @topic.forum_posts.size.should == 1
       @topic.activity_count.should == 2
@@ -142,6 +161,47 @@ describe ForumPost do
 
       @post.update_attributes :body => 'updated test post'
       @post.edited_at.should_not == nil
+    end
+
+    it "should update moderated_by_id and moderated_at" do
+      @post = create_forum_post_with_end_user(@topic, @user)
+      @post.save.should be_true
+      @topic.reload
+      @topic.forum_posts.size.should == 1
+      @topic.activity_count.should == 1
+
+      @post.moderated_by.should == nil
+      @post.moderated_at.should == nil
+
+      @moderator = create_end_user('moderator@test.dev', {})
+      @post.moderated @moderator
+      @post.save
+
+      @post.moderated_by.should == @moderator
+      @post.moderated_by_id.should == @moderator.id
+      @post.moderated_at.should_not == nil
+    end
+
+    it "should destroy post if forum category is destroyed" do
+      @post = create_forum_post_with_end_user(@topic, @user)
+      @post.save.should be_true
+      @topic.reload
+      @topic.forum_posts.size.should == 1
+      @topic.activity_count.should == 1
+
+      @cat.destroy
+
+      @destroy_cat = ForumCategory.find_by_id(@cat)
+      @destroy_cat.should be_nil
+
+      @destroy_forum = ForumForum.find_by_id(@forum)
+      @destroy_forum.should be_nil
+
+      @destroy_topic = ForumTopic.find_by_id(@topic)
+      @destroy_topic.should be_nil
+
+      @destroy_post = ForumPost.find_by_id(@post)
+      @destroy_post.should be_nil
     end
   end
 end

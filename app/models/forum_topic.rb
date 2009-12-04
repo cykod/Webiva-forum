@@ -2,10 +2,12 @@ class ForumTopic < DomainModel
   belongs_to :forum_forum, :counter_cache => true
   belongs_to :end_user
 
-  has_many :forum_posts
-  has_many :forum_subscriptions
+  has_many :forum_posts, :dependent => :destroy
+  has_many :forum_subscriptions, :dependent => :destroy
 
-  validates_presence_of :subject
+  validates_presence_of :subject, :forum_forum_id, :posted_by
+
+  validates_numericality_of :sticky, :only_integer => true
 
   cached_content :update => [ :forum_forum ]
   
@@ -15,8 +17,12 @@ class ForumTopic < DomainModel
     self.forum_posts.build( {:forum_forum_id => self.forum_forum_id}.merge(options) )
   end
 
+  def build_subscription(user)
+    self.forum_subscriptions.build( :end_user => user, :forum_forum_id => self.forum_forum_id )
+  end
+
   def first_post
-    self.forum_posts.find_by_first_post(true)
+    @first_post ||= self.forum_posts.find_by_first_post(true)
   end
 
   def default_subject
@@ -38,5 +44,11 @@ class ForumTopic < DomainModel
 
   def refresh_posts_count
     self.forum_posts_count = self.forum_posts.count(:conditions => 'approved = 1')
+  end
+
+  def before_validation_on_create
+    if self.posted_by.nil? && self.end_user
+      self.posted_by = self.end_user.first_name + ' ' + self.end_user.last_name
+    end
   end
 end

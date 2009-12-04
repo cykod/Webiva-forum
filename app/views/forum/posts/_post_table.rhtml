@@ -1,13 +1,17 @@
 <% current_time = Time.now %>
 <% active_table_for :post_table, @active_table_output,
                     :refresh_url => url_for(:action => 'post_table', :path => [@forum_category.id, @forum.id, @topic.id]),
+                    :more_actions => [ [ 'Approve', 'approve', 'Approve the selected entries?' ],
+                                       [ 'Disapprove', 'disapprove', 'Disapprove the selected entries?' ],
+                                       [ 'Delete', 'delete', 'Are you sure you want to permantently delete the selected entries?' ]
+                                     ],
                     :style => 'width:100%' do |t| %>
 <tr <%= highlight_row 'post',t.id %> >
   <td align='left' nowrap='1'><%= entry_checkbox "post", t.id %></td>
   <td width="20%" valign="top"><%= t.posted_by %> <%= (t.end_user && t.end_user.username != t.posted_by) ? ' [' + t.end_user.username + ']' : '' %>
        <br /><%= 'Posted %s ago' / time_ago_in_words(t.posted_at) %>
   </td>
-  <td valign="top">
+  <td valign="top" <%= t.approved == false ? 'class="error"' : '' %> >
     <div class="forum-post">
       <strong><%=h t.subject %></strong>
 

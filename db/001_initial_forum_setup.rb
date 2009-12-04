@@ -81,12 +81,12 @@ class InitialForumSetup < ActiveRecord::Migration
 
     create_table :forum_subscriptions, :force => true do |t|
       t.integer :end_user_id
-      t.integer :topic_id
+      t.integer :forum_topic_id
       t.integer :forum_forum_id
     end
     
-    add_index :forum_subscriptions, :topic_id, :name => 'topic_id'
-    add_index :forum_subscriptions, [ :forum_forum_id, :topic_id ], :name => 'forum_topic_id'
+    add_index :forum_subscriptions, :forum_topic_id, :name => 'forum_topic_id'
+    add_index :forum_subscriptions, [ :forum_forum_id, :forum_topic_id ], :name => 'forum_forum_id'
   end
    
   def self.down

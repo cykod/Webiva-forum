@@ -4,7 +4,8 @@
 
 <% action_panel do |p| -%>
   <%= p.link "Create a new Forum", :action => 'forum', :path => @forum_category.id, :icon => 'add.gif' %>
-  <%= p.link "Configure Forum Category", :controller => '/forum/admin', :action => 'configure', :path => @forum_category.id, :icon => 'edit.gif' %>
+  <%= p.link "Configure Forum Category", :controller => '/forum/admin', :action => 'category', :path => @forum_category.id, :icon => 'edit.gif' %>
+  <%= p.link "Delete Forum Category", :controller => '/forum/admin', :action => 'delete', :path => @forum_category.id, :icon =>'delete.gif',:right => true %>
 <% end -%>
 
 

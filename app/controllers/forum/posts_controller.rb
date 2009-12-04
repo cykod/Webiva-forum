@@ -34,6 +34,21 @@ class Forum::PostsController < ModuleController
 	  params[:post].each do |entry_id,val|
           ForumPost.destroy(entry_id.to_i)
 	end
+
+      when 'approve':
+	  params[:post].each do |entry_id,val|
+	  post = ForumPost.find(entry_id.to_i)
+	  post.approved = true
+	  post.save
+	end
+
+      when 'disapprove':
+	  params[:post].each do |entry_id,val|
+	  post = ForumPost.find(entry_id.to_i)
+	  post.approved = false
+	  post.save
+	end
+
       end
     end
     

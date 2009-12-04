@@ -65,6 +65,15 @@ class Forum::ManageController < ModuleController
     end
   end
 
+  def delete
+    forum_path 'Delete Forum'.t, nil, ['%s Forum', topics_list_url_for, @forum.name]
+
+    if request.post? && params[:destroy] == 'yes'
+      @forum.destroy
+      redirect_to forum_category_url_for
+    end
+  end
+
   private
 
   module ForumModule
@@ -85,8 +94,11 @@ class Forum::ManageController < ModuleController
 
   include ForumModule
 
-  def forum_path(path, url=nil)
+  def forum_path(path, url=nil, append_to_base=nil)
     base = build_forum_base_path
+    if ! append_to_base.nil?
+      base << append_to_base
+    end
     cms_page_path base, ['%s', url, path]
   end
 end

@@ -1,5 +1,5 @@
 class Forum::AdminController < ModuleController
-  before_filter :find_forum_category, :only => 'configure'
+  before_filter :find_forum_category, :only => ['category', 'delete']
 
   helper 'forum/path'
 
@@ -10,7 +10,7 @@ class Forum::AdminController < ModuleController
                               
   content_model :forums
   
-  content_action  'Create a new Forum Category', { :controller => '/forum/admin', :action => 'create' } 
+  content_action  'Create a new Forum Category', { :controller => '/forum/admin', :action => 'category' } 
 
   register_permission_category :forum, "Forum" ,"Permissions for Writing to and Managing Forums"
   
@@ -50,46 +50,42 @@ class Forum::AdminController < ModuleController
     end    
   end
 
-  def create
-    cms_page_path ['Content'], 'Create a new Forum Category'
-    
-    @forum_category = ForumCategory.new(params[:forum_category])
-
-    if(request.post? && params[:forum_category])
-      if(@forum_category.save)
-        redirect_to forum_category_url_for
-        return 
-      end
+  def category
+    if @forum_category.nil?
+      @forum_category = ForumCategory.new(params[:forum_category])
+      cms_page_path ['Content'], 'Create a new Forum Category'
+    else
+      cms_page_path ['Content'], ['%s Forums', forum_category_url_for, @forum_category.name]
     end
 
+    if request.post? && params[:forum_category]
+      if @forum_category.update_attributes(params[:forum_category])
+	redirect_to forum_category_url_for
+      end
+    end
   end
 
-  def configure
-    cms_page_path ['Content'], ['%s Forums', forum_category_url_for, @forum_category.name]
-    
-    if(request.post? && @forum_category && params[:forum_category])
-      if(@forum_category.update_attributes(params[:forum_category]))
-        redirect_to forum_category_url_for
-        return 
-      end
+  def delete
+    cms_page_path ['Content', ['%s Forums', forum_category_url_for, @forum_category.name]], 'Delete Forum Category'
+
+    if request.post? && params[:destroy] == 'yes'
+      @forum_category.destroy
+      redirect_to :controller => '/content', :action => 'index'
     end
   end
 
   def self.module_options(vals=nil)
     Configuration.get_config_model(Options,vals)
   end
-  
 
   class Options < HashModel
-    
-    
   end
   
   module AdminModule
     include Forum::PathHelper
 
     def find_forum_category
-      @forum_category ||= ForumCategory.find(params[:path][0])
+      @forum_category ||= ForumCategory.find(params[:path][0]) if params[:path][0]
     end
   end
 

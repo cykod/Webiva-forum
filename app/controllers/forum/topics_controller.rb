@@ -18,7 +18,7 @@ class Forum::TopicsController < ModuleController
                   hdr(:string, 'forum_topics.posted_by'),
                   hdr(:number, 'forum_topics.forum_posts_count'),
                   hdr(:number, 'forum_topics.activity_count'),
-                  hdr(:boolean, 'forum_topics.sticky'),
+                  hdr(:number, 'forum_topics.sticky'),
                   :updated_at,
                   :created_at
                 ]
@@ -62,6 +62,15 @@ class Forum::TopicsController < ModuleController
     end
   end
 
+  def delete
+    topics_path 'Delete Topic'.t, nil, ['%s', posts_list_url_for, @topic.subject]
+
+    if request.post? && params[:destroy] == 'yes'
+      @topic.destroy
+      redirect_to topics_list_url_for
+    end
+  end
+
   private
   module TopicsModule
     include  Forum::ManageController::ForumModule
@@ -81,8 +90,11 @@ class Forum::TopicsController < ModuleController
 
   include TopicsModule
 
-  def topics_path(path, url=nil)
+  def topics_path(path, url=nil, append_to_base=nil)
     base = build_topics_base_path
+    if ! append_to_base.nil?
+      base << append_to_base
+    end
     cms_page_path base, ['%s', url, path]
   end
 end

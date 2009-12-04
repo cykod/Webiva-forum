@@ -1,8 +1,15 @@
 
 
 module ForumTestHelper
-  def create_end_user(email='test@test.dev', options={:first_name => 'Test', :last_name => 'User'})
+  def create_end_user(email='test@webiva.com', options={:first_name => 'Test', :last_name => 'User'})
     EndUser.push_target(email, options)
+  end
+
+  def create_client_user(email='test@webiva.com', options={})
+    user = EndUser.push_target(email, options)
+    user.user_class = UserClass.client_user_class
+    user.client_user_id = 1
+    user
   end
 
   def create_forum_category(name='Test Category', content_filter='markdown_safe', options={})

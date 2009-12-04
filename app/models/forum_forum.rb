@@ -1,13 +1,13 @@
 class ForumForum < DomainModel
 
-  validates_presence_of :name,:forum_category_id
+  validates_presence_of :name, :forum_category_id
 
   cached_content :identifier => :url
 
-  content_node_type :forum, "Forum::ForumPost", :content_name => :name, :title_field => :subject
+  content_node_type :forum_forum, "ForumPost", :content_name => :name, :title_field => :subject
 
   belongs_to :forum_category
-  has_many :forum_topics
+  has_many :forum_topics, :dependent => :destroy
   has_many :forum_posts
   has_many :forum_subscriptions
 

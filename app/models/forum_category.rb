@@ -6,7 +6,7 @@ class ForumCategory < DomainModel
                               ['Textile Safe','textfile_safe']
                               ]
 
-  has_many :forum_forums
+  has_many :forum_forums, :dependent => :destroy
 
   validates_presence_of :name
   validates_presence_of :content_filter
