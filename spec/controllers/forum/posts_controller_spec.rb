@@ -6,6 +6,8 @@ describe Forum::PostsController do
 
   include ForumTestHelper
 
+  reset_domain_tables :end_user,:forum_forums,:forum_posts,:forum_categories,:forum_topics
+
   before(:each) do
     mock_editor
 
@@ -45,6 +47,42 @@ describe Forum::PostsController do
       response.should redirect_to(:controller => '/forum/posts', :action => 'list', :path => [@forum_category.id, @forum.id, @topic.id])
       @post.reload
       @post.body.should == 'Test Post Body'
+    end
+  end
+
+  it "should handle delete post" do 
+  
+    @post = create_forum_post_with_end_user @topic, @myself, 'Change This Body'
+    @post.save.should be_true
+    @topic.reload
+
+    assert_difference '@topic.forum_posts_count', -1 do
+      post 'post_table', :path => [@forum_category.id, @forum.id, @topic.id], :table_action => 'delete', :post => {@post.id => @post.id}
+      @topic.reload
+    end
+  end
+
+  it "should handle approving a post" do 
+  
+    @post = create_forum_post_with_end_user @topic, @myself, 'Change This Body', :approved => false
+    @post.save.should be_true
+    @topic.reload
+
+    assert_difference '@topic.forum_posts_count', 1 do
+      post 'post_table', :path => [@forum_category.id, @forum.id, @topic.id], :table_action => 'approve', :post => {@post.id => @post.id}
+      @topic.reload
+    end
+  end
+
+  it "should handle rejecting a post" do 
+  
+    @post = create_forum_post_with_end_user @topic, @myself, 'Change This Body'
+    @post.save.should be_true
+    @topic.reload
+
+    assert_difference '@topic.forum_posts_count', -1 do
+      post 'post_table', :path => [@forum_category.id, @forum.id, @topic.id], :table_action => 'reject', :post => {@post.id => @post.id}
+      @topic.reload
     end
   end
 

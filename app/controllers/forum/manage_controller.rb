@@ -34,18 +34,7 @@ class Forum::ManageController < ModuleController
   end
 
   def forum_table(display=true)
-    if(request.post? && params[:table_action] && params[:forum].is_a?(Hash)) 
-      
-      case params[:table_action]
-      when 'delete':
-	  params[:forum].each do |entry_id,val|
-          ForumForum.destroy(entry_id.to_i)
-	end
-      end
-    end
-    
     @active_table_output = forum_table_generate params, :order => 'forum_forums.updated_at DESC', :conditions => ['forum_forums.forum_category_id = ?',@forum_category.id ]
-
     
     render :partial => 'forum_table' if display
   end

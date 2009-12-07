@@ -6,6 +6,8 @@ describe Forum::AdminController do
 
   include ForumTestHelper
 
+  reset_domain_tables :end_user,:forum_forums,:forum_posts,:forum_categories,:forum_topics
+
   it "should be able to create categories" do
     mock_editor
 

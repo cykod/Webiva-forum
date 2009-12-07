@@ -6,6 +6,8 @@ describe Forum::ManageController do
 
   include ForumTestHelper
 
+  reset_domain_tables :end_user,:forum_forums,:forum_posts,:forum_categories,:forum_topics
+
   before(:each) do
     @forum_category = create_forum_category
     @forum_category.save

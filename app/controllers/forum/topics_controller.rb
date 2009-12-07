@@ -32,16 +32,6 @@ class Forum::TopicsController < ModuleController
   end
 
   def topic_table(display=true)
-    if(request.post? && params[:table_action] && params[:topic].is_a?(Hash)) 
-      
-      case params[:table_action]
-      when 'delete':
-	  params[:topic].each do |entry_id,val|
-          ForumTopic.destroy(entry_id.to_i)
-	end
-      end
-    end
-    
     @active_table_output = topic_table_generate params, :order => 'forum_topics.updated_at DESC', :conditions => ['forum_topics.forum_forum_id = ?',@forum.id ]
 
     render :partial => 'topic_table' if display

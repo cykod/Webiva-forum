@@ -48,7 +48,13 @@ class ForumTopic < DomainModel
 
   def before_validation_on_create
     if self.posted_by.nil? && self.end_user
-      self.posted_by = self.end_user.first_name + ' ' + self.end_user.last_name
+      if self.end_user.first_name && self.end_user.last_name
+	self.posted_by = self.end_user.first_name + ' ' + self.end_user.last_name
+      elsif self.end_user.username
+	self.posted_by = self.end_user.username
+      else
+	self.posted_by = self.end_user.email
+      end
     end
   end
 end

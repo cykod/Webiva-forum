@@ -6,7 +6,11 @@ describe Forum::TopicsController do
 
   include ForumTestHelper
 
+  reset_domain_tables :end_user,:forum_forums,:forum_posts,:forum_categories,:forum_topics
+
   before(:each) do
+    mock_editor
+
     @forum_category = create_forum_category
     @forum_category.save
     @forum = create_forum_forum @forum_category
@@ -23,7 +27,6 @@ describe Forum::TopicsController do
   end
 
   it "should be able to create topics" do
-    mock_editor
 
     assert_difference 'ForumTopic.count', 1 do
       post 'topic', :path => [@forum_category.id, @forum.id], :topic => { :subject => 'Test Subject', :forum_forum_id => @forum.id, :end_user_id => @myself.id }
@@ -33,8 +36,6 @@ describe Forum::TopicsController do
   end
 
   it "should be able to edit topic" do
-    mock_editor
-
     @topic = create_forum_topic_with_end_user @forum, @myself, 'Change This Subject'
     @topic.save.should be_true
 
@@ -47,8 +48,6 @@ describe Forum::TopicsController do
   end
 
   it "should be able to delete a topic" do
-    mock_editor
-
     @topic = create_forum_topic_with_end_user @forum, @myself
     @topic.save.should be_true
 
