@@ -6,11 +6,22 @@ describe Forum::ManageController do
 
   include ForumTestHelper
 
+  before(:each) do
+    @forum_category = create_forum_category
+    @forum_category.save
+  end
+
+  it "should handle table list" do 
+  
+    # Test all the permutations of an active table
+    controller.should handle_active_table(:forum_table) do |args|
+      args[:path] = [@forum_category.id]
+      post 'forum_table', args
+    end
+  end
+
   it "should be able to create forums" do
     mock_editor
-
-    @forum_category = create_forum_category
-    @forum_category.save.should be_true
 
     assert_difference 'ForumForum.count', 1 do
       post 'forum', :path => [@forum_category.id], :forum => { :name => 'Test Forum', :forum_category_id => @forum_category.id }
@@ -21,9 +32,6 @@ describe Forum::ManageController do
 
   it "should be able to edit forum" do
     mock_editor
-
-    @forum_category = create_forum_category
-    @forum_category.save.should be_true
 
     @forum = create_forum_forum @forum_category, 'Change This Forum Name'
     @forum.save.should be_true
@@ -38,9 +46,6 @@ describe Forum::ManageController do
 
   it "should be able to delete a forum" do
     mock_editor
-
-    @forum_category = create_forum_category
-    @forum_category.save.should be_true
 
     @forum = create_forum_forum @forum_category
     @forum.save.should be_true

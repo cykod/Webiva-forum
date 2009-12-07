@@ -13,6 +13,15 @@ describe Forum::TopicsController do
     @forum.save
   end
 
+  it "should handle table list" do 
+  
+    # Test all the permutations of an active table
+    controller.should handle_active_table(:topic_table) do |args|
+      args[:path] = [@forum_category.id, @forum.id]
+      post 'topic_table', args
+    end
+  end
+
   it "should be able to create topics" do
     mock_editor
 

@@ -17,6 +17,15 @@ describe Forum::PostsController do
     @topic.save
   end
 
+  it "should handle table list" do 
+  
+    # Test all the permutations of an active table
+    controller.should handle_active_table(:post_table) do |args|
+      args[:path] = [@forum_category.id, @forum.id, @topic.id]
+      post 'post_table', args
+    end
+  end
+
   it "should be able to create posts" do
 
     assert_difference 'ForumPost.count', 1 do
