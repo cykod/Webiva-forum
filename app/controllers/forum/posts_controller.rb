@@ -17,7 +17,7 @@ class Forum::PostsController < ModuleController
                   hdr(:icon, '', :width=>28),
                   hdr(:options, 'forum_posts.approved', :options => [['Approved',1],['Rejected',0]], :icon => 'icons/table_actions/rating_none.gif', :width => '32'),
                   hdr(:string, 'forum_posts.posted_by'),
-                  hdr(:static, 'Post')
+                  hdr(:date_range, 'forum_posts.posted_at', :label => 'Post')
                 ]
 
   cms_admin_paths 'content', 
