@@ -61,5 +61,23 @@ describe ForumTopic do
       @topic.save.should be_true
       @forum.forum_topics.sticky_topics.count.should == 1
     end
+
+    it "should be able create a topic with its first post" do
+      @topic = @forum.forum_topics.build :subject => 'test subject', :end_user => @user, :body => 'First Post'
+      @topic.save.should be_true
+      @topic.reload
+      @topic.forum_posts.count.should == 1
+
+      post = @topic.first_post
+
+      post.body.should == 'First Post'
+      post.subject.should == 'test subject'
+      post.end_user.should == @user
+      post.posted_by.should == (@user.first_name + ' ' + @user.last_name)
+
+      @topic.body = 'Changed Post Body'
+      post.reload
+      post.body.should == 'Changed Post Body'
+    end
   end
 end

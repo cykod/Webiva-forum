@@ -12,6 +12,9 @@ class Forum::PageController < ParagraphController
   editor_for :topic, :name => "Forum Topic Display", :feature => :forum_page_topic,
              :inputs => { :forum => [[:url, 'Forum Url', :path]], 
                           :topic => [[:id, 'Topic Id', :path]] }
+  editor_for :new_topic, :name => "New Topic Form", :feature => :forum_page_new_topic,
+             :inputs => { :forum => [[:url, 'Forum Url', :path]], 
+                          :topic => [[:id, 'Topic Id', :path]] }
   editor_for :recent, :name => "Recent Posts Display", :feature => :forum_page_recent
 
   class CategoriesOptions < HashModel
@@ -44,6 +47,15 @@ class Forum::PageController < ParagraphController
     attributes :forum_forum_id => nil, :posts_per_page => 20, :category_page_id => nil, :forum_page_id => nil
 
     integer_options :forum_forum_id, :posts_per_page
+
+    page_options :category_page_id
+    page_options :forum_page_id
+  end
+
+  class NewTopicOptions < HashModel
+    attributes :forum_forum_id => nil, :category_page_id => nil, :forum_page_id => nil
+
+    integer_options :forum_forum_id
 
     page_options :category_page_id
     page_options :forum_page_id

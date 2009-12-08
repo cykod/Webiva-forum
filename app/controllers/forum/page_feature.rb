@@ -147,6 +147,35 @@ class Forum::PageFeature < ParagraphFeature
     end
   end
 
+  feature :forum_page_new_topic, :default_feature => <<-FEATURE
+    <cms:category>
+      <h1><cms:category_link><cms:name/> Forums</cms:category_link></h1>
+      <cms:forum>
+        <div class="forum">
+          <cms:image align='left' border='10' size='icon' ><cms:forum_link><cms:value/></cms:forum_link></cms:image>
+          <h3><cms:forum_link><cms:name/></cms:forum_link></h3>
+          <div style="clear:both;"></div>
+        </div>
+        <h3>Create a New Topic</h3>
+      </cms:forum>
+      <cms:pages/>
+    </cms:category>
+  FEATURE
+  
+  def forum_page_new_topic_feature(data)
+    webiva_feature(:forum_page_new_topic) do |c|
+      c.expansion_tag('category') { |t| t.locals.category = data[:forum].forum_category }
+
+      add_category_features(c, data)
+
+      c.expansion_tag('forum') { |t| t.locals.forum = data[:forum] }
+
+      add_forum_features(c, data)
+
+      c.pagelist_tag('pages', :field => 'forum_page' ) { |t| data[:pages] }
+    end
+  end
+
   feature :forum_page_recent, :default_feature => <<-FEATURE
     Recent Feature Code...
   FEATURE

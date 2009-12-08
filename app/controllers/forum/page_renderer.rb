@@ -11,6 +11,7 @@ class Forum::PageRenderer < ParagraphRenderer
   paragraph :list
   paragraph :forum
   paragraph :topic
+  paragraph :new_topic
   paragraph :recent
 
   def categories
@@ -103,6 +104,36 @@ class Forum::PageRenderer < ParagraphRenderer
     else
       render_paragraph :text => ''
     end
+  end
+
+  def new_topic
+    @options = paragraph_options(:forum)
+
+    if editor?
+      if @options.forum_forum_id.blank?
+	@forum = ForumForum.find(:first)
+      else
+	@forum = ForumForum.find_by_id @options.forum_forum_id
+      end
+    elsif @options.forum_forum_id.blank?
+      conn_type, conn_id = page_connection(:forum)
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless conn_type == :url
+
+      @forum = ForumForum.find_by_url conn_id
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
+    else
+      @forum = ForumForum.find @options.forum_forum_id
+    end
+
+    @topic = @forum.forum_topics.build :end_user => myself
+
+    if request.post? && params[:topic]
+      if @topic.save(params[:topic])
+	#redirect_to <back to forum display>
+      end
+    end
+
+    render_paragraph :feature => :forum_page_new_topic
   end
 
   def recent

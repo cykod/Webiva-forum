@@ -27,6 +27,24 @@ class ForumTopic < DomainModel
     @first_post ||= self.forum_posts.find_by_first_post(true)
   end
 
+  def body
+    self.first_post ? self.first_post.body : nil
+  end
+
+  def body_html
+    self.first_post ? self.first_post.body_html : nil
+  end
+
+  def body=(body)
+    post = self.first_post
+    if post
+      post.body = body
+      post.save
+    else
+      @first_post_body = body
+    end
+  end
+
   def default_subject
     if self.forum_posts.count == 0
       self.subject
@@ -62,6 +80,14 @@ class ForumTopic < DomainModel
       else
 	self.posted_by = self.end_user.email
       end
+    end
+  end
+
+  def after_save
+    if @first_post_body
+      post = self.build_post :body => @first_post_body, :subject => self.subject, :end_user => self.end_user, :posted_by => self.posted_by
+      post.save
+      @first_post_body = nil
     end
   end
 end
