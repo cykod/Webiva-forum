@@ -42,6 +42,8 @@ describe ForumForum do
 
       @main_forums = @cat.main_forums.collect { |row| row.id }
       @main_forums.index(@forum.id).should_not be_nil
+
+      @cat.forum_forums.main_forums.count.should == 1
     end
   end
 

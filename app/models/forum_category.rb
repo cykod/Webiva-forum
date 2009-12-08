@@ -31,7 +31,7 @@ class ForumCategory < DomainModel
   end
 
   def main_forums
-    @forums ||= self.forum_forums.find(:all, :conditions => 'main_page = 1', :order => 'name')
+    @forums ||= self.forum_forums.main_forums.find(:all, :order => 'name')
   end
 
 end

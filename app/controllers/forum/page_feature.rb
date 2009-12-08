@@ -109,17 +109,8 @@ class Forum::PageFeature < ParagraphFeature
 
   feature :forum_page_topic, :default_feature => <<-FEATURE
     <cms:category>
-      <h1><cms:category_link><cms:name/> Forums</cms:category_link></h1>
       <cms:forum>
-        <div class="forum">
-          <cms:image align='left' border='10' size='small' ><cms:forum_link><cms:value/></cms:forum_link></cms:image>
-          <h3><cms:forum_link><cms:name/></cms:forum_link></h3>
-          <div style="clear:both;"></div>
-        </div>
         <cms:topic>
-          <div class="topic">
-            <div class="subject"><cms:topic_link><cms:subject/></cms:topic_link></div>
-          </div>
           <cms:posts>
             <cms:post>
               <div class="post">

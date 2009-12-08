@@ -13,6 +13,8 @@ class ForumForum < DomainModel
 
   belongs_to :image, :class_name => 'DomainFile'
 
+  named_scope :main_forums, :conditions => 'main_page = 1'
+
   def before_validation
     self.url = generate_url(:url,self.name) if self.url.blank?
   end

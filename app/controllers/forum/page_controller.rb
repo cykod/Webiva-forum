@@ -41,9 +41,9 @@ class Forum::PageController < ParagraphController
   end
 
   class TopicOptions < HashModel
-    attributes :posts_per_page => 20, :category_page_id => nil, :forum_page_id => nil
+    attributes :forum_forum_id => nil, :posts_per_page => 20, :category_page_id => nil, :forum_page_id => nil
 
-    integer_options :posts_per_page
+    integer_options :forum_forum_id, :posts_per_page
 
     page_options :category_page_id
     page_options :forum_page_id

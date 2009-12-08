@@ -55,5 +55,11 @@ describe ForumTopic do
       @forum.reload
       @forum.forum_topics.size.should == 2
     end
+
+    it "should be able to set a topic as sticky" do
+      @topic = @forum.forum_topics.build :subject => 'test subject', :end_user => @user, :sticky => 1
+      @topic.save.should be_true
+      @forum.forum_topics.sticky_topics.count.should == 1
+    end
   end
 end

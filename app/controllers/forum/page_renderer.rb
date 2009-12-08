@@ -51,10 +51,10 @@ class Forum::PageRenderer < ParagraphRenderer
       end
     elsif @options.forum_forum_id.blank?
       conn_type, conn_id = page_connection(:forum)
-      raise SiteNodeEngine::MissingPageException( site_node, language ) unless conn_type == :url
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless conn_type == :url
 
       @forum = ForumForum.find_by_url conn_id
-      raise SiteNodeEngine::MissingPageException( site_node, language ) unless @forum
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
 
       conn_type, conn_id = page_connection(:topic)
       if conn_type == :id
@@ -64,23 +64,45 @@ class Forum::PageRenderer < ParagraphRenderer
       @forum = ForumForum.find @options.forum_forum_id
     end
 
-    if @topic
-      topic
-    else
-      if @forum
-	@pages, @topics = @forum.forum_topics.paginate(params[:forum_page], :per_page => @options.topics_per_page, :order => 'sticky, created_at DESC')
-      end
-      render_paragraph :feature => :forum_page_forum
+    if @forum && @topic.nil?
+      @pages, @topics = @forum.forum_topics.paginate(params[:forum_page], :per_page => @options.topics_per_page, :order => 'sticky, created_at DESC')
     end
+
+    render_paragraph :feature => :forum_page_forum
   end
 
   def topic
+    @options = paragraph_options(:topic)
+
+    if editor?
+      if @options.forum_forum_id.blank?
+	@forum = ForumForum.find(:first)
+      else
+	@forum = ForumForum.find_by_id @options.forum_forum_id
+      end
+      @topic = @forum.forum_topics.find(:first) if @forum;
+    else
+      if @options.forum_forum_id.blank?
+	conn_type, conn_id = page_connection(:forum)
+	if conn_type == :url
+	  @forum = ForumForum.find_by_url conn_id
+	end
+      else
+	@forum = ForumForum.find @options.forum_forum_id
+      end
+
+      conn_type, conn_id = page_connection(:topic)
+      if conn_type == :id
+	@topic = @forum.forum_topics.find_by_id conn_id if @forum
+      end
+    end
 
     if @topic
-      @pages, @posts = @topic.forum_posts.paginate(params[:forum_page], :per_page => @options.posts_per_page, :conditions => 'approved = 1', :order => 'posted_at DESC')
+      @pages, @posts = @topic.forum_posts.approved_posts.paginate(params[:posts_page], :per_page => @options.posts_per_page, :order => 'posted_at')
+      render_paragraph :feature => :forum_page_topic
+    else
+      render_paragraph :text => ''
     end
-  
-    render_paragraph :feature => :forum_page_topic
   end
 
   def recent

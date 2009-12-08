@@ -13,6 +13,8 @@ class ForumTopic < DomainModel
   
   belongs_to :last_post, :class_name => 'ForumPost'
 
+  named_scope :sticky_topics, :conditions => 'sticky > 0'
+
   def build_post(options={})
     self.forum_posts.build( {:forum_forum_id => self.forum_forum_id}.merge(options) )
   end
@@ -48,7 +50,7 @@ class ForumTopic < DomainModel
   end
 
   def refresh_posts_count
-    self.forum_posts_count = self.forum_posts.count(:conditions => 'approved = 1')
+    self.forum_posts_count = self.forum_posts.approved_posts.count
   end
 
   def before_validation_on_create

@@ -14,6 +14,8 @@ class ForumPost < DomainModel
     }
   end
 
+  named_scope :approved_posts, :conditions => 'approved = 1'
+
   def moderated(end_user)
     self.moderated_at = Time.now
     self.moderated_by = end_user
