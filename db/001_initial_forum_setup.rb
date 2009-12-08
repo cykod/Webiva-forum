@@ -3,6 +3,7 @@ class InitialForumSetup < ActiveRecord::Migration
 
     create_table :forum_categories, :force => true do |t|
       t.string :name
+      t.string :url
       t.text :description
       t.integer :weight, :default => 0
 

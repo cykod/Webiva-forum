@@ -33,13 +33,18 @@ class ForumTopic < DomainModel
     end
   end
 
+  def recent_activity_count(from=nil)
+    from ||= 2.days.ago
+    self.updated_at >= from ? self.activity_count : 0
+  end
+
   def calculate_activity_count(from=nil)
     from ||= 2.days.ago
     self.forum_posts.count( :conditions => ['posted_at >= ?', from] )
   end
 
-  def refresh_activity_count
-    self.activity_count = calculate_activity_count
+  def refresh_activity_count(from=nil)
+    self.activity_count = calculate_activity_count(from)
   end
 
   def refresh_posts_count

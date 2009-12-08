@@ -35,6 +35,14 @@ describe ForumForum do
 
       @forum.url.should == 'test-forum'
     end
+
+    it "should be able to set main_page = true and use ForumCategory.main_forums to fetch" do
+      @forum = @cat.forum_forums.build :name => 'Test Forum', :main_page => true
+      @forum.save.should be_true
+
+      @main_forums = @cat.main_forums.collect { |row| row.id }
+      @main_forums.index(@forum.id).should_not be_nil
+    end
   end
 
 end

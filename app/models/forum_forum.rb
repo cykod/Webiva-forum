@@ -14,7 +14,7 @@ class ForumForum < DomainModel
   belongs_to :image, :class_name => 'DomainFile'
 
   def before_validation
-    self.url = generate_url(:url,self.name)
+    self.url = generate_url(:url,self.name) if self.url.blank?
   end
 
   def content_filter

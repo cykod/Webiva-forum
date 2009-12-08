@@ -17,6 +17,13 @@ describe ForumCategory do
     @cat.should have(2).errors_on(:content_filter)
   end
 
+  it "should be able to create a new forum and generate a url" do
+    @cat = ForumCategory.new :name => 'Test Category', :content_filter => 'markdown_safe'
+    @cat.save.should be_true
+
+    @cat.url.should == 'test-category'
+  end
+
   it 'should only allow valid filters' do
     ForumCategory.filter_user_options.each do |ele|
       @cat = ForumCategory.new :name => 'Test Category', :content_filter => ele[1]

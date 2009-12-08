@@ -104,6 +104,9 @@ describe ForumPost do
       @topic.reload
       @topic.forum_posts.size.should == 1
       @topic.activity_count.should == 2
+
+      @topic.updated_at = 3.days.ago
+      @topic.recent_activity_count.should == 0
     end
 
     it "should decrement forum_posts_count for destroy posts" do
