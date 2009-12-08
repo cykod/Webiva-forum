@@ -22,7 +22,7 @@ describe ForumPost do
     @post = create_forum_post_with_end_user(@topic, @user)
     @post.save.should be_true
     @topic.reload
-    @topic.forum_posts.size.should == 1
+    @topic.forum_posts.size.should == 2
   end
 
   describe 'Detailed forum post testing' do
@@ -40,7 +40,7 @@ describe ForumPost do
       @post = create_forum_post_with_end_user(@topic, @user)
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 1
+      @topic.forum_posts.size.should == 2
     end
 
     it "should require a end_user_id, forum_forum_id and forum_topic_id" do

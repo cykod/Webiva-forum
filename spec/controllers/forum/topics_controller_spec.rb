@@ -29,7 +29,7 @@ describe Forum::TopicsController do
   it "should be able to create topics" do
 
     assert_difference 'ForumTopic.count', 1 do
-      post 'topic', :path => [@forum_category.id, @forum.id], :topic => { :subject => 'Test Subject', :forum_forum_id => @forum.id, :end_user_id => @myself.id }
+      post 'topic', :path => [@forum_category.id, @forum.id], :topic => { :subject => 'Test Subject', :body => 'First Post', :forum_forum_id => @forum.id, :end_user_id => @myself.id }
       @topic = ForumTopic.find(:last)
       response.should redirect_to(:controller => '/forum/posts', :action => 'list', :path => [@forum_category.id, @forum.id, @topic.id])
     end

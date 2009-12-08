@@ -1,7 +1,8 @@
 <div class='admin_content'>
 <% admin_form_for :topic, @topic, :html => { :class => 'admin_form' } do |f| -%>
 <%= f.text_field :subject, :vertical => true, :required => true %>
-<%= f.end_user_selector :posted_by, :id_field => 'end_user_id', :vertical => true %>
+<%= f.end_user_selector :posted_by, :id_field => 'end_user_id', :vertical => true, :required => true %>
+<%= f.text_area :body, :vertical => true, :required => true %>
 <%= f.text_field :sticky, :vertical => true %>
 <%= f.submit_tag @topic.id ? 'Update Topic' : 'Create Topic', :vertical => true%>
 <% end -%>

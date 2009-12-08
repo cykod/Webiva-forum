@@ -5,7 +5,7 @@ class ForumTopic < DomainModel
   has_many :forum_posts, :dependent => :destroy
   has_many :forum_subscriptions, :dependent => :destroy
 
-  validates_presence_of :subject, :forum_forum_id, :posted_by
+  validates_presence_of :subject, :forum_forum_id, :posted_by, :body
 
   validates_numericality_of :sticky, :only_integer => true
 
@@ -28,7 +28,7 @@ class ForumTopic < DomainModel
   end
 
   def body
-    self.first_post ? self.first_post.body : nil
+    self.first_post ? self.first_post.body : @first_post_body
   end
 
   def body_html
