@@ -148,29 +148,26 @@ class Forum::PageFeature < ParagraphFeature
   end
 
   feature :forum_page_new_post, :default_feature => <<-FEATURE
-    <cms:category>
-      <h1><cms:category_link><cms:name/> Forums</cms:category_link></h1>
-      <cms:forum>
-        <div class="forum">
-          <cms:image align='left' border='10' size='icon' ><cms:forum_link><cms:value/></cms:forum_link></cms:image>
-          <h3><cms:forum_link><cms:name/></cms:forum_link></h3>
-          <div style="clear:both;"></div>
-        </div>
-        <cms:new_post>
-          <cms:errors><div class='errors'><cms:value/></div></cms:errors>
-          <cms:topic>
-            <h2><cms:subject/></h2>
-          <h3>Create a New Post</h3>
-          </cms:topic>
-          <cms:no_topic>
-            <h3>Create a New Topic</h3>
-          </cms:no_topic>
-          Subject:<br/><cms:subject/><br/>
-          Body:<br/><cms:body/><br/>
-          <cms:submit/>
-        </cms:new_post>
-      </cms:forum>
-    </cms:category>
+    <cms:no_topic>
+      <cms:category>
+        <h1><cms:category_link><cms:name/> Forums</cms:category_link></h1>
+        <cms:forum>
+          <div class="forum">
+            <cms:image align='left' border='10' size='icon' ><cms:forum_link><cms:value/></cms:forum_link></cms:image>
+            <h3><cms:forum_link><cms:name/></cms:forum_link></h3>
+            <div style="clear:both;"></div>
+          </div>
+          <h3>Start a New Topic</h3>
+        </cms:forum>
+      </cms:category>
+    </cms:no_topic>
+
+    <cms:new_post>
+      <cms:errors><div class='errors'><cms:value/></div></cms:errors>
+      Subject:<br/><cms:subject/><br/>
+      Body:<br/><cms:body/><br/>
+      <cms:submit/>
+    </cms:new_post>
   FEATURE
   
   def forum_page_new_post_feature(data)
@@ -187,11 +184,11 @@ class Forum::PageFeature < ParagraphFeature
 
       add_topic_features(c, data)
 
-      c.form_for_tag('forum:new_post','post') { |t| data[:post] }
-        c.form_error_tag('forum:new_post:errors')
-        c.field_tag('forum:new_post:subject')
-        c.field_tag('forum:new_post:body', :control => 'text_area', :rows => 6, :cols => 50)
-        c.submit_tag('forum:new_post:submit', :default => 'Submit')
+      c.form_for_tag('new_post','post') { |t| data[:post] }
+        c.form_error_tag('new_post:errors')
+        c.field_tag('new_post:subject')
+        c.field_tag('new_post:body', :control => 'text_area', :rows => 6, :cols => 50)
+        c.submit_tag('new_post:submit', :default => 'Submit')
 
     end
   end
