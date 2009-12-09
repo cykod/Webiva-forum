@@ -132,7 +132,11 @@ class Forum::PageRenderer < ParagraphRenderer
       end
     end
 
-    if ! @forum.allow_anonymous_posting && myself.id.nil?
+    if @topic
+      if ! @forum.allowed_to_create_post?(myself)
+	return render_paragraph :text => ''
+      end
+    elsif ! @forum.allowed_to_create_topic?(myself)
       return render_paragraph :text => ''
     end
 

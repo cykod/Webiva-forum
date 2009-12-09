@@ -34,4 +34,12 @@ class ForumForum < DomainModel
   def allow_attachments
     self.forum_category.allow_attachments
   end
+
+  def allowed_to_create_post?(end_user)
+    (self.allow_anonymous_posting || (end_user && end_user.id)) ? true : false
+  end
+
+  def allowed_to_create_topic?(end_user)
+    self.allowed_to_create_post?(end_user)
+  end
 end
