@@ -156,9 +156,14 @@ class Forum::PageFeature < ParagraphFeature
           <h3><cms:forum_link><cms:name/></cms:forum_link></h3>
           <div style="clear:both;"></div>
         </div>
-        <h3>Create a New Topic</h3>
+        <cms:new_topic>
+          <cms:errors><div class='errors'><cms:value/></div></cms:errors>
+          <h3>Create a New Topic</h3>
+          Subject:<br/><cms:subject/><br/>
+          Body:<br/><cms:body/><br/>
+          <cms:submit/>
+        </cms:new_topic>
       </cms:forum>
-      <cms:pages/>
     </cms:category>
   FEATURE
   
@@ -172,7 +177,13 @@ class Forum::PageFeature < ParagraphFeature
 
       add_forum_features(c, data)
 
-      c.pagelist_tag('pages', :field => 'forum_page' ) { |t| data[:pages] }
+
+      c.form_for_tag('forum:new_topic','topic') { |t| data[:topic] }
+        c.form_error_tag('forum:new_topic:errors')
+        c.field_tag('forum:new_topic:subject')
+        c.field_tag('forum:new_topic:body', :control => 'text_area', :rows => 6, :cols => 50)
+        c.submit_tag('forum:new_topic:submit', :default => 'Submit')
+
     end
   end
 

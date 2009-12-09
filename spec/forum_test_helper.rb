@@ -24,16 +24,16 @@ module ForumTestHelper
     end
   end
 
-  def create_forum_topic(forum=nil, subject='Test Topic Subject', body='First Post', options={})
+  def create_forum_topic(forum=nil, subject='Test Topic Subject', options={})
     if forum.nil?
-      ForumTopic.new( {:subject => subject, :body => body}.merge(options) )
+      ForumTopic.new( {:subject => subject}.merge(options) )
     else
-      forum.forum_topics.build( {:subject => subject, :body => body}.merge(options) )
+      forum.forum_topics.build( {:subject => subject}.merge(options) )
     end
   end
 
-  def create_forum_topic_with_end_user(forum=nil, end_user=nil, subject='Test Topic Subject', body='First Post', options={})
-    create_forum_topic( forum, subject, body, {:end_user => end_user}.merge(options) )
+  def create_forum_topic_with_end_user(forum=nil, end_user=nil, subject='Test Topic Subject', options={})
+    create_forum_topic( forum, subject, {:end_user => end_user}.merge(options) )
   end
 
   def create_forum_post(topic=nil, body='test post', options={})

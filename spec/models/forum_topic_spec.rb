@@ -34,51 +34,32 @@ describe ForumTopic do
       @topic.valid?
 
       @topic.should have(1).errors_on(:subject)
-      @topic.should have(1).errors_on(:body)
       @topic.should have(1).errors_on(:posted_by)
       @topic.should have(1).errors_on(:forum_forum_id)
     end
 
     it "should set posted_by to end_user.username" do
-      @topic = @forum.forum_topics.build :subject => 'test subject', :end_user => @user, :body => 'First Post'
+      @topic = @forum.forum_topics.build :subject => 'test subject', :end_user => @user
       @topic.save.should be_true
       @topic.posted_by.should == (@user.first_name + ' ' + @user.last_name)
     end
 
     it "should increment forum_topics_count" do
-      @topic = @forum.forum_topics.build :subject => 'test subject', :posted_by => 'Test User', :body => 'First Post'
+      @topic = @forum.forum_topics.build :subject => 'test subject', :posted_by => 'Test User'
       @topic.save.should be_true
       @forum.reload
       @forum.forum_topics.size.should == 1
 
-      @topic = @forum.forum_topics.build :subject => 'test subject', :end_user => @user, :body => 'First Post'
+      @topic = @forum.forum_topics.build :subject => 'test subject', :end_user => @user
       @topic.save.should be_true
       @forum.reload
       @forum.forum_topics.size.should == 2
     end
 
     it "should be able to set a topic as sticky" do
-      @topic = @forum.forum_topics.build :subject => 'test subject', :end_user => @user, :body => 'First Post', :sticky => 1
+      @topic = @forum.forum_topics.build :subject => 'test subject', :end_user => @user, :sticky => 1
       @topic.save.should be_true
       @forum.forum_topics.sticky_topics.count.should == 1
-    end
-
-    it "should be able create a topic with its first post" do
-      @topic = @forum.forum_topics.build :subject => 'test subject', :end_user => @user, :body => 'First Post'
-      @topic.save.should be_true
-      @topic.reload
-      @topic.forum_posts.count.should == 1
-
-      post = @topic.first_post
-
-      post.body.should == 'First Post'
-      post.subject.should == 'test subject'
-      post.end_user.should == @user
-      post.posted_by.should == (@user.first_name + ' ' + @user.last_name)
-
-      @topic.body = 'Changed Post Body'
-      post.reload
-      post.body.should == 'Changed Post Body'
     end
   end
 end

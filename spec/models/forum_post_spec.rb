@@ -35,15 +35,15 @@ describe ForumPost do
       @forum.reload
     end
 
-    it "should require a body, posted_by, forum_forum_id and forum_topic_id" do
+    it "should require a body, posted_by and forum_forum_id" do
       @post = ForumPost.new()
 
       @post.valid?
 
       @post.should have(1).errors_on(:body)
+      @post.should have(1).errors_on(:subject)
       @post.should have(1).errors_on(:posted_by)
       @post.should have(1).errors_on(:forum_forum_id)
-      @post.should have(1).errors_on(:forum_topic_id)
     end
 
     it "should set posted_by to end_user.username" do
@@ -56,20 +56,17 @@ describe ForumPost do
       @post = @topic.build_post :body => 'test post', :end_user => @user
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 2
+      @topic.forum_posts.size.should == 1
 
       @post = @topic.build_post :body => 'test post', :posted_by => 'Test User2'
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 3
+      @topic.forum_posts.size.should == 2
     end
 
     it "should be able to fetch first post" do
-      @first_post = @topic.first_post
-      @first_post.should_not be_nil
-      @post = @topic.build_post :body => 'test post', :end_user => @user
-      @post.save.should be_true
-      @topic.first_post.should_not == @post
+      @first_post = @topic.build_post :body => 'test post', :end_user => @user
+      @first_post.save.should be_true
 
       @post = @topic.build_post :body => '2nd test post', :posted_by => 'user2'
       @post.save.should be_true
@@ -93,19 +90,19 @@ describe ForumPost do
       @post = create_forum_post_with_end_user(@topic, @user)
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 2
-      @topic.activity_count.should == 2
+      @topic.forum_posts.size.should == 1
+      @topic.activity_count.should == 1
 
       @post = create_forum_post(@topic, 'test post', {:posted_by => 'Test User 2'})
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 3
-      @topic.activity_count.should == 3
+      @topic.forum_posts.size.should == 2
+      @topic.activity_count.should == 2
 
       @post.update_attributes :approved => false
       @topic.reload
-      @topic.forum_posts.size.should == 2
-      @topic.activity_count.should == 3
+      @topic.forum_posts.size.should == 1
+      @topic.activity_count.should == 2
 
       @topic.updated_at = 3.days.ago
       @topic.recent_activity_count.should == 0
@@ -115,43 +112,43 @@ describe ForumPost do
       @post = create_forum_post_with_end_user(@topic, @user)
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 2
-      @topic.activity_count.should == 2
+      @topic.forum_posts.size.should == 1
+      @topic.activity_count.should == 1
 
       @post = create_forum_post(@topic, 'test post to destroy', {:posted_by => 'Test User 3'})
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 3
-      @topic.activity_count.should == 3
+      @topic.forum_posts.size.should == 2
+      @topic.activity_count.should == 2
 
       @post.destroy
       @topic.reload
-      @topic.forum_posts.size.should == 2
-      @topic.activity_count.should == 3
+      @topic.forum_posts.size.should == 1
+      @topic.activity_count.should == 2
     end
 
     it "should increment activity_count for new posts in last 2 days" do
       @post = create_forum_post_with_end_user(@topic, @user)
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 2
-      @topic.activity_count.should == 2
+      @topic.forum_posts.size.should == 1
+      @topic.activity_count.should == 1
 
       @post.update_attributes :posted_at => 3.days.ago
 
       @post = create_forum_post(@topic, 'test post', {:posted_by => 'Test User2'})
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 3
-      @topic.activity_count.should == 2
+      @topic.forum_posts.size.should == 2
+      @topic.activity_count.should == 1
 
       @post.update_attributes :posted_at => 1.days.ago
 
       @post = create_forum_post(@topic, 'test post', {:posted_by => 'Test User3'})
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 4
-      @topic.activity_count.should == 3
+      @topic.forum_posts.size.should == 3
+      @topic.activity_count.should == 2
     end
 
     it "should only update edited_at if body changes" do
@@ -172,8 +169,8 @@ describe ForumPost do
       @post = create_forum_post_with_end_user(@topic, @user)
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 2
-      @topic.activity_count.should == 2
+      @topic.forum_posts.size.should == 1
+      @topic.activity_count.should == 1
 
       @post.moderated_by.should == nil
       @post.moderated_at.should == nil
@@ -191,8 +188,8 @@ describe ForumPost do
       @post = create_forum_post_with_end_user(@topic, @user)
       @post.save.should be_true
       @topic.reload
-      @topic.forum_posts.size.should == 2
-      @topic.activity_count.should == 2
+      @topic.forum_posts.size.should == 1
+      @topic.activity_count.should == 1
 
       @cat.destroy
 
@@ -207,6 +204,15 @@ describe ForumPost do
 
       @destroy_post = ForumPost.find_by_id(@post)
       @destroy_post.should be_nil
+    end
+
+    it "should be able to create a topic from the first post" do
+      @post = ForumPost.new :subject => 'Test Subject', :body => 'First Post', :end_user => @user, :forum_forum => @forum
+      @post.save.should be_true
+      @post.forum_topic.should_not be_nil
+      @forum.reload
+      @forum.forum_topics.size.should == 2
+      @post.forum_topic.should_not == @topic
     end
   end
 end

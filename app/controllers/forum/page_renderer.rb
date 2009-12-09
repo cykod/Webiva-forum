@@ -128,8 +128,8 @@ class Forum::PageRenderer < ParagraphRenderer
     @topic = @forum.forum_topics.build :end_user => myself
 
     if request.post? && params[:topic]
-      if @topic.save(params[:topic])
-	#redirect_to <back to forum display>
+      if @topic.update_attributes(params[:topic].slice(:subject, :body))
+	#redirect_to <topic>
       end
     end
 

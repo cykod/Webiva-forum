@@ -4,7 +4,7 @@ class ForumPost < DomainModel
   belongs_to :end_user
   belongs_to :moderated_by, :class_name => 'EndUser'
 
-  validates_presence_of :body, :posted_by, :forum_forum_id, :forum_topic_id
+  validates_presence_of :body, :subject, :posted_by, :forum_forum_id
 
   cached_content :update => [ :forum_forum, :forum_topic ]
 
@@ -21,6 +21,14 @@ class ForumPost < DomainModel
     self.moderated_by = end_user
   end
 
+  def sticky
+    self.forum_topic.sticky
+  end
+
+  def sticky=(sticky)
+    self.forum_topic.sticky = sticky
+  end
+
   def before_validation_on_create
     if self.posted_by.nil? && self.end_user
       if self.end_user.first_name && self.end_user.last_name
@@ -31,6 +39,10 @@ class ForumPost < DomainModel
 	self.posted_by = self.end_user.email
       end
     end
+
+    if self.subject.nil? && self.forum_topic
+      self.subject = self.forum_topic.default_subject
+    end
   end
 
   def before_update
@@ -40,6 +52,11 @@ class ForumPost < DomainModel
   end
 
   def before_create
+    if self.forum_topic.nil?
+      self.create_forum_topic :subject => self.subject, :posted_by => self.posted_by,
+	                      :end_user_id => self.end_user_id, :forum_forum_id => self.forum_forum_id
+    end
+
     self.first_post = self.forum_topic.forum_posts.count == 0
     self.posted_at = Time.new
   end
