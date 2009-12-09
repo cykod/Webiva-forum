@@ -147,7 +147,7 @@ class Forum::PageFeature < ParagraphFeature
     end
   end
 
-  feature :forum_page_new_topic, :default_feature => <<-FEATURE
+  feature :forum_page_new_post, :default_feature => <<-FEATURE
     <cms:category>
       <h1><cms:category_link><cms:name/> Forums</cms:category_link></h1>
       <cms:forum>
@@ -156,19 +156,25 @@ class Forum::PageFeature < ParagraphFeature
           <h3><cms:forum_link><cms:name/></cms:forum_link></h3>
           <div style="clear:both;"></div>
         </div>
-        <cms:new_topic>
+        <cms:new_post>
           <cms:errors><div class='errors'><cms:value/></div></cms:errors>
-          <h3>Create a New Topic</h3>
+          <cms:topic>
+            <h2><cms:subject/></h2>
+          <h3>Create a New Post</h3>
+          </cms:topic>
+          <cms:no_topic>
+            <h3>Create a New Topic</h3>
+          </cms:no_topic>
           Subject:<br/><cms:subject/><br/>
           Body:<br/><cms:body/><br/>
           <cms:submit/>
-        </cms:new_topic>
+        </cms:new_post>
       </cms:forum>
     </cms:category>
   FEATURE
   
-  def forum_page_new_topic_feature(data)
-    webiva_feature(:forum_page_new_topic) do |c|
+  def forum_page_new_post_feature(data)
+    webiva_feature(:forum_page_new_post) do |c|
       c.expansion_tag('category') { |t| t.locals.category = data[:forum].forum_category }
 
       add_category_features(c, data)
@@ -177,12 +183,15 @@ class Forum::PageFeature < ParagraphFeature
 
       add_forum_features(c, data)
 
+      c.expansion_tag('topic') { |t| data[:topic] ? t.locals.topic = data[:topic] : nil }
 
-      c.form_for_tag('forum:new_topic','topic') { |t| data[:topic] }
-        c.form_error_tag('forum:new_topic:errors')
-        c.field_tag('forum:new_topic:subject')
-        c.field_tag('forum:new_topic:body', :control => 'text_area', :rows => 6, :cols => 50)
-        c.submit_tag('forum:new_topic:submit', :default => 'Submit')
+      add_topic_features(c, data)
+
+      c.form_for_tag('forum:new_post','post') { |t| data[:post] }
+        c.form_error_tag('forum:new_post:errors')
+        c.field_tag('forum:new_post:subject')
+        c.field_tag('forum:new_post:body', :control => 'text_area', :rows => 6, :cols => 50)
+        c.submit_tag('forum:new_post:submit', :default => 'Submit')
 
     end
   end

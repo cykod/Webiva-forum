@@ -12,7 +12,7 @@ class Forum::PageController < ParagraphController
   editor_for :topic, :name => "Forum Topic Display", :feature => :forum_page_topic,
              :inputs => { :forum => [[:url, 'Forum Url', :path]], 
                           :topic => [[:id, 'Topic Id', :path]] }
-  editor_for :new_topic, :name => "New Topic Form", :feature => :forum_page_new_topic,
+  editor_for :new_post, :name => "New Post Form", :feature => :forum_page_new_post,
              :inputs => { :forum => [[:url, 'Forum Url', :path]], 
                           :topic => [[:id, 'Topic Id', :path]] }
   editor_for :recent, :name => "Recent Posts Display", :feature => :forum_page_recent
@@ -35,24 +35,26 @@ class Forum::PageController < ParagraphController
   end
 
   class ForumOptions < HashModel
-    attributes :forum_forum_id => nil, :topics_per_page => 20, :category_page_id => nil, :forum_page_id => nil
+    attributes :forum_forum_id => nil, :topics_per_page => 20, :category_page_id => nil, :forum_page_id => nil, :new_post_page_id => nil
 
     integer_options :forum_forum_id, :topics_per_page
 
     page_options :category_page_id
     page_options :forum_page_id
+    page_options :new_post_page_id
   end
 
   class TopicOptions < HashModel
-    attributes :forum_forum_id => nil, :posts_per_page => 20, :category_page_id => nil, :forum_page_id => nil
+    attributes :forum_forum_id => nil, :posts_per_page => 20, :category_page_id => nil, :forum_page_id => nil, :new_post_page_id => nil
 
     integer_options :forum_forum_id, :posts_per_page
 
     page_options :category_page_id
     page_options :forum_page_id
+    page_options :new_post_page_id
   end
 
-  class NewTopicOptions < HashModel
+  class NewPostOptions < HashModel
     attributes :forum_forum_id => nil, :category_page_id => nil, :forum_page_id => nil
 
     integer_options :forum_forum_id

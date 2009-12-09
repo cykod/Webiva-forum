@@ -11,7 +11,7 @@ class Forum::PageRenderer < ParagraphRenderer
   paragraph :list
   paragraph :forum
   paragraph :topic
-  paragraph :new_topic
+  paragraph :new_post
   paragraph :recent
 
   def categories
@@ -106,7 +106,7 @@ class Forum::PageRenderer < ParagraphRenderer
     end
   end
 
-  def new_topic
+  def new_post
     @options = paragraph_options(:forum)
 
     if editor?
@@ -115,25 +115,33 @@ class Forum::PageRenderer < ParagraphRenderer
       else
 	@forum = ForumForum.find_by_id @options.forum_forum_id
       end
-    elsif @options.forum_forum_id.blank?
-      conn_type, conn_id = page_connection(:forum)
-      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless conn_type == :url
-
-      @forum = ForumForum.find_by_url conn_id
-      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
     else
-      @forum = ForumForum.find @options.forum_forum_id
+      if @options.forum_forum_id.blank?
+	conn_type, conn_id = page_connection(:forum)
+	raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless conn_type == :url
+
+	@forum = ForumForum.find_by_url conn_id
+	raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
+      else
+	@forum = ForumForum.find @options.forum_forum_id
+      end
+
+      conn_type, conn_id = page_connection(:topic)
+      if conn_type == :id && ! conn_id.blank?
+	@topic = @forum.forum_topics.find conn_id.to_i
+      end
     end
 
-    @topic = @forum.forum_topics.build :end_user => myself
+    @post = @topic ? @topic.build_post : @forum.forum_posts.build
+    @post.end_user = myself
 
-    if request.post? && params[:topic]
-      if @topic.update_attributes(params[:topic].slice(:subject, :body))
+    if request.post? && params[:post]
+      if @post.update_attributes(params[:post].slice(:subject, :body))
 	#redirect_to <topic>
       end
     end
 
-    render_paragraph :feature => :forum_page_new_topic
+    render_paragraph :feature => :forum_page_new_post
   end
 
   def recent
