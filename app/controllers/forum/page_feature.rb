@@ -143,23 +143,13 @@ class Forum::PageFeature < ParagraphFeature
       c.loop_tag('forum:topic:post') { |t| data[:posts] }
         add_post_features(c, data, 'forum:topic:post')
 
-      c.pagelist_tag('pages', :field => 'forum_page' ) { |t| data[:pages] }
+      c.pagelist_tag('pages', :field => 'posts_page' ) { |t| data[:pages] }
     end
   end
 
   feature :forum_page_new_post, :default_feature => <<-FEATURE
     <cms:no_topic>
-      <cms:category>
-        <h1><cms:category_link><cms:name/> Forums</cms:category_link></h1>
-        <cms:forum>
-          <div class="forum">
-            <cms:image align='left' border='10' size='icon' ><cms:forum_link><cms:value/></cms:forum_link></cms:image>
-            <h3><cms:forum_link><cms:name/></cms:forum_link></h3>
-            <div style="clear:both;"></div>
-          </div>
-          <h3>Start a New Topic</h3>
-        </cms:forum>
-      </cms:category>
+      <h3>Start a New Topic</h3>
     </cms:no_topic>
 
     <cms:new_post>
@@ -218,6 +208,10 @@ class Forum::PageFeature < ParagraphFeature
     context.date_tag(base + ':created_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.forum.created_at }
     context.value_tag(base + ':created_ago') { |t| time_ago_in_words(t.locals.forum.created_at) }
     context.h_tag(base + ':topics_count') { |t| pluralize(t.locals.forum.forum_topics_count, 'topic') }
+
+    if ! data[:options].new_post_page_id.blank?
+      context.link_tag(base + ':new_topic') { |t| "#{data[:options].new_post_page_url}/#{t.locals.forum.url}" }
+    end
   end
 
   def add_topic_features(context, data, base='topic')
@@ -230,6 +224,10 @@ class Forum::PageFeature < ParagraphFeature
     context.value_tag(base + ':updated_ago') { |t| time_ago_in_words(t.locals.topic.updated_at) }
     context.date_tag(base + ':created_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.topic.created_at }
     context.value_tag(base + ':created_ago') { |t| time_ago_in_words(t.locals.topic.created_at) }
+
+    if ! data[:options].new_post_page_id.blank?
+      context.link_tag(base + ':new_post') { |t| "#{data[:options].new_post_page_url}/#{t.locals.forum.url}/#{t.locals.topic.id}" }
+    end
   end
 
   def add_post_features(context, data, base='post')

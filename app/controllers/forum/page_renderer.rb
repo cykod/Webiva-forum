@@ -107,7 +107,7 @@ class Forum::PageRenderer < ParagraphRenderer
   end
 
   def new_post
-    @options = paragraph_options(:forum)
+    @options = paragraph_options(:new_post)
 
     if editor?
       if @options.forum_forum_id.blank?
@@ -137,7 +137,12 @@ class Forum::PageRenderer < ParagraphRenderer
 
     if request.post? && params[:post]
       if @post.update_attributes(params[:post].slice(:subject, :body))
-	redirect_to @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
+	posts_page = ((@post.forum_topic.forum_posts.size-1) / @options.posts_per_page).to_i + 1
+	if posts_page > 1
+	  redirect_to @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s + '?posts_page=' + posts_page.to_s
+	else
+	  redirect_to @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
+	end
       end
     end
 
