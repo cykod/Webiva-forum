@@ -132,6 +132,10 @@ class Forum::PageRenderer < ParagraphRenderer
       end
     end
 
+    if ! @forum.allow_anonymous_posting && myself.id.nil?
+      return render_paragraph :text => ''
+    end
+
     @post = @topic ? @topic.build_post : @forum.forum_posts.build
     @post.end_user = myself
 
