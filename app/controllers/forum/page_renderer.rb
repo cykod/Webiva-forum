@@ -99,6 +99,7 @@ class Forum::PageRenderer < ParagraphRenderer
     end
 
     if @topic
+      set_page_connection :topic, @topic
       @pages, @posts = @topic.forum_posts.approved_posts.paginate(params[:posts_page], :per_page => @options.posts_per_page, :order => 'posted_at')
       render_paragraph :feature => :forum_page_topic
     else
@@ -117,18 +118,25 @@ class Forum::PageRenderer < ParagraphRenderer
       end
     else
       if @options.forum_forum_id.blank?
-	conn_type, conn_id = page_connection(:forum)
-	raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless conn_type == :url
+	conn_type, conn_id = page_connection
+	if conn_type == :forum
+	  @forum = conn_id
+	elsif conn_type == :topic
+	  @topic = conn_id
+	  @forum = @topic.forum_forum
+	elsif conn_type == :forum_path
+	  @forum = ForumForum.find_by_url conn_id
+	  raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
 
-	@forum = ForumForum.find_by_url conn_id
-	raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
+	  conn_type, conn_id = page_connection(:topic)
+	  if ! conn_id.blank? && conn_type == :id
+	    @topic = @forum.forum_topics.find conn_id
+	  end
+	else
+	  return render_paragraph :text => '[Configure page connections]'
+	end
       else
 	@forum = ForumForum.find @options.forum_forum_id
-      end
-
-      conn_type, conn_id = page_connection(:topic)
-      if conn_type == :id && ! conn_id.blank?
-	@topic = @forum.forum_topics.find conn_id.to_i
       end
     end
 
