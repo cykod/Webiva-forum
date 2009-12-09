@@ -45,6 +45,31 @@ describe ForumForum do
 
       @cat.forum_forums.main_forums.count.should == 1
     end
+
+    it "should be able to test if an end_user can create a forum" do
+      end_user = create_end_user
+      anonymous_end_user = EndUser.new :username => 'Anonymous User'
+
+      @cat = create_forum_category('Test Category', 'markdown_safe', :allow_anonymous_posting => false)
+      @cat.save.should be_true
+      @forum = create_forum_forum @cat
+      @forum.save.should be_true
+
+      @forum.allowed_to_create_topic?(end_user).should be_true
+      @forum.allowed_to_create_topic?(anonymous_end_user).should_not be_true
+      @forum.allowed_to_create_post?(end_user).should be_true
+      @forum.allowed_to_create_post?(anonymous_end_user).should_not be_true
+
+      @cat = create_forum_category('Test Category', 'markdown_safe', :allow_anonymous_posting => true)
+      @cat.save.should be_true
+      @forum = create_forum_forum @cat
+      @forum.save.should be_true
+
+      @forum.allowed_to_create_topic?(end_user).should be_true
+      @forum.allowed_to_create_topic?(anonymous_end_user).should be_true
+      @forum.allowed_to_create_post?(end_user).should be_true
+      @forum.allowed_to_create_post?(anonymous_end_user).should be_true
+    end
   end
 
 end
