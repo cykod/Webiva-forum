@@ -137,7 +137,7 @@ class Forum::PageRenderer < ParagraphRenderer
 
     if request.post? && params[:post]
       if @post.update_attributes(params[:post].slice(:subject, :body))
-	#redirect_to <topic>
+	redirect_to @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
       end
     end
 

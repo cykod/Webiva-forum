@@ -40,7 +40,7 @@ class ForumPost < DomainModel
       end
     end
 
-    if self.subject.nil? && self.forum_topic
+    if self.subject.blank? && self.forum_topic
       self.subject = self.forum_topic.default_subject
     end
   end
