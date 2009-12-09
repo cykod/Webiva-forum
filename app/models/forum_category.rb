@@ -8,6 +8,7 @@ class ForumCategory < DomainModel
 
   has_many :forum_forums, :dependent => :destroy
   has_many :forum_topics, :through => :forum_forums
+  has_many :forum_posts, :through => :forum_forums
 
   validates_presence_of :name
   validates_presence_of :content_filter
