@@ -30,8 +30,10 @@ class Forum::PageRenderer < ParagraphRenderer
     elsif @options.forum_category_id.blank?
       conn_type, conn_id = page_connection
       @category = ForumCategory.find_by_url conn_id
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @category
     else
       @category = ForumCategory.find @options.forum_category_id
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @category
     end
 
     if @category
@@ -51,7 +53,10 @@ class Forum::PageRenderer < ParagraphRenderer
       else
 	@forum = ForumForum.find_by_id @options.forum_forum_id
       end
-    elsif @options.forum_forum_id.blank?
+    elsif ! @options.forum_forum_id.blank?
+      @forum = ForumForum.find @options.forum_forum_id
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
+    else
       conn_type, conn_id = page_connection(:forum)
       raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless conn_type == :url
 
@@ -62,8 +67,6 @@ class Forum::PageRenderer < ParagraphRenderer
       if conn_type == :id
 	@topic = @forum.forum_topics.find_by_id conn_id
       end
-    else
-      @forum = ForumForum.find @options.forum_forum_id
     end
 
     if @forum && @topic.nil?
@@ -131,7 +134,7 @@ class Forum::PageRenderer < ParagraphRenderer
 	  raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
 
 	  conn_type, conn_id = page_connection(:topic)
-	  if ! conn_id.blank? && conn_type == :id
+	  if conn_type == :id && ! conn_id.blank?
 	    @topic = @forum.forum_topics.find conn_id
 	  end
 	else
@@ -157,14 +160,14 @@ class Forum::PageRenderer < ParagraphRenderer
       if @post.update_attributes(params[:post].slice(:subject, :body))
 	posts_page = ((@post.forum_topic.forum_posts.size-1) / @options.posts_per_page).to_i + 1
 	if posts_page > 1
-	  redirect_to @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s + '?posts_page=' + posts_page.to_s
+	  redirect_paragraph @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s + '?posts_page=' + posts_page.to_s
 	else
-	  redirect_to @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
+	  redirect_paragraph @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
 	end
       end
+    else
+      render_paragraph :feature => :forum_page_new_post
     end
-
-    render_paragraph :feature => :forum_page_new_post
   end
 
   def recent
@@ -180,9 +183,9 @@ class Forum::PageRenderer < ParagraphRenderer
 	@category = ForumCategory.find(:first)
       end
     elsif ! @options.forum_category_id.blank?
-      @category = ForumCategory.find_by_id @options.forum_category_id
+      @category = ForumCategory.find @options.forum_category_id
     elsif ! @options.forum_forum_id.blank?
-      @forum = ForumForum.find_by_id @options.forum_forum_id
+      @forum = ForumForum.find @options.forum_forum_id
       @category = @forum.forum_category
     else
       conn_type, conn_id = page_connection
@@ -191,7 +194,7 @@ class Forum::PageRenderer < ParagraphRenderer
 	@category = conn_id
       elsif conn_type == :forum
 	@forum = conn_id
-	@category.forum_category
+	@category = @forum.forum_category
       elsif conn_type == :category_path
 	@category = ForumCategory.find_by_url conn_id
 	raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @category
