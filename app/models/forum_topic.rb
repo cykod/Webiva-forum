@@ -13,7 +13,8 @@ class ForumTopic < DomainModel
   
   belongs_to :last_post, :class_name => 'ForumPost'
 
-  named_scope :sticky_topics, :conditions => 'sticky > 0'
+  named_scope :sticky_topics, :conditions => 'forum_topics.sticky > 0'
+  named_scope :recent_topics, :conditions => ['forum_topics.updated_at > ? and forum_topics.activity_count > 0', 1.day.ago]
 
   def build_post(options={})
     self.forum_posts.build( {:forum_forum_id => self.forum_forum_id}.merge(options) )
@@ -60,7 +61,7 @@ class ForumTopic < DomainModel
 
   def calculate_activity_count(from=nil)
     from ||= 2.days.ago
-    self.forum_posts.count( :conditions => ['posted_at >= ?', from] )
+    self.forum_posts.count( :conditions => ['forum_posts.posted_at >= ?', from] )
   end
 
   def refresh_activity_count(from=nil)

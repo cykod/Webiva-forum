@@ -7,6 +7,7 @@ class ForumCategory < DomainModel
                               ]
 
   has_many :forum_forums, :dependent => :destroy
+  has_many :forum_topics, :through => :forum_forums
 
   validates_presence_of :name
   validates_presence_of :content_filter
@@ -31,7 +32,7 @@ class ForumCategory < DomainModel
   end
 
   def main_forums
-    @forums ||= self.forum_forums.main_forums.find(:all, :order => 'name')
+    @forums ||= self.forum_forums.main_forums.find(:all, :order => 'forum_forums.name')
   end
 
 end

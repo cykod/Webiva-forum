@@ -184,12 +184,35 @@ class Forum::PageFeature < ParagraphFeature
   end
 
   feature :forum_page_recent, :default_feature => <<-FEATURE
-    Recent Feature Code...
+    <cms:topics>
+      <h3>Active Topics</h3>
+      <cms:topic>
+        <div class="topic">
+          <div class="subject"><cms:topic_link><cms:subject/></cms:topic_link></div>
+          <div class="count"><cms:posts_count/></div>
+        </div>
+      </cms:topic>
+      <cms:pages/>
+    </cms:topics>
+    <cms:no_topics>
+      <p>No recent activity</p>
+    </cms:no_topics>
   FEATURE
   
   def forum_page_recent_feature(data)
     webiva_feature(:forum_page_recent) do |c|
-      # c.define_tag ...
+      c.expansion_tag('category') { |t| t.locals.category = data[:category] }
+
+      add_category_features(c, data)
+
+      c.expansion_tag('forum') { |t| t.locals.forum = data[:forum] }
+
+      add_forum_features(c, data)
+
+      c.loop_tag('topic') { |t| data[:topics] }
+        add_topic_features(c, data)
+
+      c.pagelist_tag('pages', :field => 'forum_page' ) { |t| data[:pages] }
     end
   end
 

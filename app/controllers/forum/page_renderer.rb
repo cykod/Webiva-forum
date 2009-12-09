@@ -35,6 +35,7 @@ class Forum::PageRenderer < ParagraphRenderer
     end
 
     if @category
+      set_page_connection :category, @category
       @pages, @forums = @category.forum_forums.paginate(params[:forum_page], :per_page => @options.forums_per_page, :order => 'weight DESC, name' )
     end
 
@@ -69,6 +70,7 @@ class Forum::PageRenderer < ParagraphRenderer
       @pages, @topics = @forum.forum_topics.paginate(params[:forum_page], :per_page => @options.topics_per_page, :order => 'sticky, created_at DESC')
     end
 
+    set_page_connection :forum, @forum
     render_paragraph :feature => :forum_page_forum
   end
 
@@ -166,7 +168,50 @@ class Forum::PageRenderer < ParagraphRenderer
   end
 
   def recent
-  
+    @options = paragraph_options(:recent)
+
+    if editor?
+      if ! @options.forum_category_id.blank?
+	@category = ForumCategory.find_by_id @options.forum_category_id
+      elsif ! @options.forum_forum_id.blank?
+	@forum = ForumForum.find_by_id @options.forum_forum_id
+	@category = @forum.forum_category
+      else
+	@category = ForumCategory.find(:first)
+      end
+    elsif ! @options.forum_category_id.blank?
+      @category = ForumCategory.find_by_id @options.forum_category_id
+    elsif ! @options.forum_forum_id.blank?
+      @forum = ForumForum.find_by_id @options.forum_forum_id
+      @category = @forum.forum_category
+    else
+      conn_type, conn_id = page_connection
+
+      if conn_type == :category
+	@category = conn_id
+      elsif conn_type == :forum
+	@forum = conn_id
+	@category.forum_category
+      elsif conn_type == :category_path
+	@category = ForumCategory.find_by_url conn_id
+	raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @category
+
+	conn_type, conn_id = page_connection(:forum)
+	if ! conn_id.blank? && conn_type == :url
+	  @forum = @category.forum_forums.find_by_url conn_id
+	  raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
+	end
+      else
+	return render_paragraph :text => '[Configure page connections]'
+      end
+    end
+
+    if @forum
+      @pages, @topics = @forum.forum_topics.recent_topics.paginate(params[:forum_page], :per_page => @options.topics_per_page, :order => 'activity_count')
+    elsif @category
+      @pages, @topics = @category.forum_topics.recent_topics.paginate(params[:forum_page], :per_page => @options.topics_per_page, :order => 'activity_count')
+    end
+
     render_paragraph :feature => :forum_page_recent
   end
 
