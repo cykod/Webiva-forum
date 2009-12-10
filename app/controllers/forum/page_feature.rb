@@ -156,6 +156,9 @@ class Forum::PageFeature < ParagraphFeature
       <cms:errors><div class='errors'><cms:value/></div></cms:errors>
       Subject:<br/><cms:subject/><br/>
       Body:<br/><cms:body/><br/>
+      <cms:attachment>
+        Attachment:<br/><cms:file/><br/>
+      </cms:attachment>
       <cms:submit/>
     </cms:new_post>
   FEATURE
@@ -174,10 +177,12 @@ class Forum::PageFeature < ParagraphFeature
 
       add_topic_features(c, data)
 
-      c.form_for_tag('new_post','post') { |t| data[:post] }
+      c.form_for_tag('new_post','post', :html => {:multipart => true}) { |t| t.locals.post = data[:post] }
         c.form_error_tag('new_post:errors')
         c.field_tag('new_post:subject')
         c.field_tag('new_post:body', :control => 'text_area', :rows => 6, :cols => 50)
+        c.expansion_tag('new_post:attachment') { |t| t.locals.post.can_add_attachments? }
+          c.field_tag('new_post:attachment:file', :field => 'attachment_id', :control => 'upload_document')
         c.submit_tag('new_post:submit', :default => 'Submit')
 
     end

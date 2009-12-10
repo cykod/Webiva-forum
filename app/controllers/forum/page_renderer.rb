@@ -157,7 +157,11 @@ class Forum::PageRenderer < ParagraphRenderer
     @post.end_user = myself
 
     if request.post? && params[:post]
-      if @post.update_attributes(params[:post].slice(:subject, :body))
+      if @post.can_add_attachments?
+	handle_file_upload params[:post], 'attachment_id', {:folder => @post.upload_folder_id}
+      end
+
+      if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id))
 	posts_page = ((@post.forum_topic.forum_posts.size-1) / @options.posts_per_page).to_i + 1
 	if posts_page > 1
 	  redirect_paragraph @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s + '?posts_page=' + posts_page.to_s

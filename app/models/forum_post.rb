@@ -3,6 +3,7 @@ class ForumPost < DomainModel
   belongs_to :forum_topic
   belongs_to :end_user
   belongs_to :moderated_by, :class_name => 'EndUser'
+  has_many :forum_post_attachments
 
   validates_presence_of :body, :subject, :posted_by, :forum_forum_id
 
@@ -78,5 +79,48 @@ class ForumPost < DomainModel
   def after_destroy
     self.forum_topic.refresh_posts_count
     self.forum_topic.save
+  end
+
+  def attachment
+    file = self.forum_post_attachments.find(:first)
+    file ? file.domain_file : nil
+  end
+
+  def attachment_id
+    return @attachment_id if @attachment_id
+    file = self.forum_post_attachments.find(:first)
+    if file
+      @attachment_id = file.domain_file.id
+    else
+      nil
+    end
+  end
+
+  def attachment_id=(id)
+    @attachment_id = id.to_i
+  end
+
+  def after_save
+    if @attachment_id
+      file = self.forum_post_attachments.find(:first)
+      if ! file
+	file = self.forum_post_attachments.new( :end_user => self.end_user, :forum_post => self )
+      end
+      file.domain_file_id = @attachment_id
+      file.save
+      @attachment_id = nil
+    end
+  end
+
+  def can_add_attachments?
+    self.forum_forum.can_add_attachments_to_posts?
+  end
+
+  def upload_folder
+    self.forum_forum.upload_folder
+  end
+
+  def upload_folder_id
+    self.forum_forum.upload_folder_id
   end
 end

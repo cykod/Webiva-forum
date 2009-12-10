@@ -9,6 +9,7 @@ class ForumCategory < DomainModel
   has_many :forum_forums, :dependent => :destroy
   has_many :forum_topics, :through => :forum_forums
   has_many :forum_posts, :through => :forum_forums
+  belongs_to :upload_folder, :foreign_key => 'folder_id', :class_name => 'DomainFile'
 
   validates_presence_of :name
   validates_presence_of :content_filter
@@ -36,4 +37,7 @@ class ForumCategory < DomainModel
     @forums ||= self.forum_forums.main_forums.find(:all, :order => 'forum_forums.name')
   end
 
+  def can_add_attachments_to_posts?
+    self.allow_attachments && self.upload_folder
+  end
 end

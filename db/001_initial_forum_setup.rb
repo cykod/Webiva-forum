@@ -96,6 +96,7 @@ class InitialForumSetup < ActiveRecord::Migration
     drop_table :forum_topics
     drop_table :forum_posts
     drop_table :forum_subscriptions
+    drop_table :forum_post_attachments
   end
 
 end

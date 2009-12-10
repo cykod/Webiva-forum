@@ -42,4 +42,16 @@ class ForumForum < DomainModel
   def allowed_to_create_topic?(end_user)
     self.allowed_to_create_post?(end_user)
   end
+
+  def can_add_attachments_to_posts?
+    self.forum_category.can_add_attachments_to_posts?
+  end
+
+  def upload_folder
+    self.forum_category.upload_folder
+  end
+
+  def upload_folder_id
+    self.forum_category.folder_id
+  end
 end
