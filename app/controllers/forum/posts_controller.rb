@@ -69,6 +69,7 @@ class Forum::PostsController < ModuleController
 
     if request.post? && params[:post]
       if @post.update_attributes(params[:post])
+	flash[:notice] = params[:path][3] ? 'Updated Post'.t : 'Created a new Post'.t
 	redirect_to posts_list_url_for
       end
     end

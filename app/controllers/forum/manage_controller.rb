@@ -49,6 +49,7 @@ class Forum::ManageController < ModuleController
 
     if request.post? && params[:forum]
       if @forum.update_attributes(params[:forum])
+	flash[:notice] = params[:path][1] ? 'Updated Forum Configuration'.t : 'Created a new Forum'.t
 	redirect_to topics_list_url_for
       end
     end
@@ -59,6 +60,7 @@ class Forum::ManageController < ModuleController
 
     if request.post? && params[:destroy] == 'yes'
       @forum.destroy
+      flash[:notice] = 'Deleted "%s" Forum' / @forum.name
       redirect_to forum_category_url_for
     end
   end

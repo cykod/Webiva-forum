@@ -60,6 +60,7 @@ class Forum::AdminController < ModuleController
 
     if request.post? && params[:forum_category]
       if @forum_category.update_attributes(params[:forum_category])
+	flash[:notice] = params[:path][0] ? 'Updated Forum Category Configuration'.t : 'Created a new Forum Category'.t
 	redirect_to forum_category_url_for
       end
     end
@@ -70,6 +71,7 @@ class Forum::AdminController < ModuleController
 
     if request.post? && params[:destroy] == 'yes'
       @forum_category.destroy
+      flash[:notice] = 'Deleted "%s" Forum Category' / @forum_category.name
       redirect_to :controller => '/content', :action => 'index'
     end
   end

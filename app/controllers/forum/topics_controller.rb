@@ -47,6 +47,7 @@ class Forum::TopicsController < ModuleController
 
     if request.post? && params[:topic]
       if @topic.update_attributes(params[:topic])
+	flash[:notice] = params[:path][2] ? 'Updated Topic'.t : 'Created a new Topic'.t
 	redirect_to posts_list_url_for
       end
     end
@@ -57,6 +58,7 @@ class Forum::TopicsController < ModuleController
 
     if request.post? && params[:destroy] == 'yes'
       @topic.destroy
+      flash[:notice] = 'Deleted Topic'.t
       redirect_to topics_list_url_for
     end
   end
