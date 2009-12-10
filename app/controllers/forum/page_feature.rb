@@ -122,7 +122,7 @@ class Forum::PageFeature < ParagraphFeature
                   <cms:attachment>
                     <cms:image size="small"/>
                     <cms:no_image>
-                      <br/><a href="<cms:url/>">Download Attachment</a>
+                      <br/><a href="<cms:url/>"><img src="<cms:thumbnail_url/>" width="32"></a> Download <a href="<cms:url/>"><cms:name/></a>
                     </cms:no_image>
                   </cms:attachment>
                 </div>
@@ -269,26 +269,19 @@ class Forum::PageFeature < ParagraphFeature
     context.h_tag(base + ':posted_by') { |t| t.locals.post.posted_by }
     context.value_tag(base + ':body') { |t| t.locals.post.body_html }
 
-    context.expansion_tag(base + ':attachment') { |t| t.locals.post.attachment }
-      context.image_tag(base + ':attachment:image') do |t|
-        if t.locals.post.attachment && t.locals.post.attachment.file_type_match('img')
-	  t.locals.post.attachment
-	else
-	  nil
-	end
-      end
-
-      context.value_tag(base + ':attachment:url') do |t|
-        if t.locals.post.attachment
-	  t.locals.post.attachment.full_url
-	else
-	  nil
-	end
-      end
+    context.expansion_tag(base + ':attachment') { |t| t.locals.attachment = t.locals.post.attachment }
+      add_attachment_features(context, data, base + ':attachment')
 
     context.date_tag(base + ':edited_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.post.edited_at }
     context.value_tag(base + ':edited_ago') { |t| time_ago_in_words(t.locals.post.edited_at) }
     context.date_tag(base + ':posted_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.post.posted_at }
     context.value_tag(base + ':posted_ago') { |t| time_ago_in_words(t.locals.post.posted_at) }
+  end
+
+  def add_attachment_features(context, data, base='attachment')
+    context.h_tag(base + ':name') { |t| t.locals.attachment.name }
+    context.image_tag(base + ':image') { |t| t.locals.attachment.image? ? t.locals.attachment : nil }
+    context.value_tag(base + ':url') { |t| t.locals.attachment.full_url }
+    context.value_tag(base + ':thumbnail_url') { |t| t.locals.attachment.thumbnail_url('standard', :icon) }
   end
 end
