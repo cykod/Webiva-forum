@@ -77,9 +77,17 @@ class Forum::PageFeature < ParagraphFeature
           <h3><cms:forum_link><cms:name/></cms:forum_link></h3>
           <div style="clear:both;"></div>
         </div>
+        <div class="new-topic">
+          <cms:new_topic_link>Start a New Topic</cms:new_topic_link>
+        </div>
         <cms:topics>
           <cms:topic>
+            <cms:not_sticky>
             <div class="topic">
+            </cms:not_sticky>
+            <cms:sticky>
+            <div class="sticky-topic">
+            </cms:sticky>
               <div class="subject"><cms:topic_link><cms:subject/></cms:topic_link></div>
               <div class="count"><cms:posts_count/></div>
             </div>
@@ -242,6 +250,7 @@ class Forum::PageFeature < ParagraphFeature
     context.date_tag(base + ':created_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.forum.created_at }
     context.value_tag(base + ':created_ago') { |t| time_ago_in_words(t.locals.forum.created_at) }
     context.h_tag(base + ':topics_count') { |t| pluralize(t.locals.forum.forum_topics_count, 'topic') }
+    context.expansion_tag(base + ':on_main_page') { |t| t.locals.forum.main_page }
 
     if data[:options].new_post_page_id && ! data[:options].new_post_page_id.blank?
       context.link_tag(base + ':new_topic') { |t| "#{data[:options].new_post_page_url}/#{t.locals.forum.url}" }
@@ -258,6 +267,7 @@ class Forum::PageFeature < ParagraphFeature
     context.value_tag(base + ':updated_ago') { |t| time_ago_in_words(t.locals.topic.updated_at) }
     context.date_tag(base + ':created_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.topic.created_at }
     context.value_tag(base + ':created_ago') { |t| time_ago_in_words(t.locals.topic.created_at) }
+    context.expansion_tag(base + ':sticky') { |t| t.locals.topic.sticky > 0 }
 
     if data[:options].new_post_page_id && ! data[:options].new_post_page_id.blank?
       context.link_tag(base + ':new_post') { |t| "#{data[:options].new_post_page_url}/#{t.locals.forum.url}/#{t.locals.topic.id}" }
