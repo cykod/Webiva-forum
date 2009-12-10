@@ -36,7 +36,11 @@ class ForumForum < DomainModel
   end
 
   def allowed_to_create_post?(end_user)
-    (self.allow_anonymous_posting || (end_user && end_user.id)) ? true : false
+    if self.forum_category.post_permission_granted?(end_user)
+      (self.allow_anonymous_posting || (end_user && end_user.id)) ? true : false
+    else
+      false
+    end
   end
 
   def allowed_to_create_topic?(end_user)
