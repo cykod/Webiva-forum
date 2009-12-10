@@ -41,6 +41,8 @@ class Forum::PageRenderer < ParagraphRenderer
       @pages, @forums = @category.forum_forums.paginate(params[:forum_page], :per_page => @options.forums_per_page, :order => 'weight DESC, name' )
     end
 
+    set_title @category.name, 'category'
+
     render_paragraph :feature => :forum_page_list
   end
 
@@ -74,6 +76,9 @@ class Forum::PageRenderer < ParagraphRenderer
     end
 
     set_page_connection :forum, @forum
+
+    set_title @forum.name, 'forum'
+
     render_paragraph :feature => :forum_page_forum
   end
 
@@ -106,6 +111,9 @@ class Forum::PageRenderer < ParagraphRenderer
     if @topic
       set_page_connection :topic, @topic
       @pages, @posts = @topic.forum_posts.approved_posts.paginate(params[:posts_page], :per_page => @options.posts_per_page, :order => 'posted_at')
+
+      set_title @topic.subject[0..68], 'subject'
+
       render_paragraph :feature => :forum_page_topic
     else
       render_paragraph :text => ''
@@ -171,6 +179,10 @@ class Forum::PageRenderer < ParagraphRenderer
       end
     end
 
+    set_title @topic.subject[0..68], 'subject' if @topic
+    set_title @forum.name, 'forum'
+    set_title @topic ? @topic.subject[0..68] : @forum.name
+
     render_paragraph :feature => :forum_page_new_post
   end
 
@@ -218,6 +230,10 @@ class Forum::PageRenderer < ParagraphRenderer
     elsif @category
       @pages, @topics = @category.forum_topics.recent_topics.paginate(params[:forum_page], :per_page => @options.topics_per_page, :order => 'activity_count')
     end
+
+    set_title @category.name, 'category' if @category
+    set_title @forum.name, 'forum' if @forum
+    set_title @forum ? @forum.name : @category.name
 
     render_paragraph :feature => :forum_page_recent
   end
