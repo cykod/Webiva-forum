@@ -232,7 +232,7 @@ class Forum::PageFeature < ParagraphFeature
     context.value_tag(base + ':created_ago') { |t| time_ago_in_words(t.locals.forum.created_at) }
     context.h_tag(base + ':topics_count') { |t| pluralize(t.locals.forum.forum_topics_count, 'topic') }
 
-    if ! data[:options].new_post_page_id.blank?
+    if data[:options].new_post_page_id && ! data[:options].new_post_page_id.blank?
       context.link_tag(base + ':new_topic') { |t| "#{data[:options].new_post_page_url}/#{t.locals.forum.url}" }
     end
   end
@@ -248,7 +248,7 @@ class Forum::PageFeature < ParagraphFeature
     context.date_tag(base + ':created_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.topic.created_at }
     context.value_tag(base + ':created_ago') { |t| time_ago_in_words(t.locals.topic.created_at) }
 
-    if ! data[:options].new_post_page_id.blank?
+    if data[:options].new_post_page_id && ! data[:options].new_post_page_id.blank?
       context.link_tag(base + ':new_post') { |t| "#{data[:options].new_post_page_url}/#{t.locals.forum.url}/#{t.locals.topic.id}" }
     end
   end

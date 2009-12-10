@@ -26,7 +26,7 @@ describe Forum::ManageController do
     mock_editor
 
     assert_difference 'ForumForum.count', 1 do
-      post 'forum', :path => [@forum_category.id], :forum => { :name => 'Test Forum', :forum_category_id => @forum_category.id }
+      post 'forum', :path => [@forum_category.id], :forum => { :name => 'Test Forum' }
       @forum = ForumForum.find(:last)
       response.should redirect_to(:controller => '/forum/topics', :action => 'list', :path => [@forum_category.id, @forum.id])
     end
