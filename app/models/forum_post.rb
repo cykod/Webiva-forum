@@ -128,4 +128,17 @@ class ForumPost < DomainModel
   def upload_folder_id
     self.forum_forum.upload_folder_id
   end
+
+  def valid_file_size?(size)
+    self.forum_forum.valid_file_size?(size)
+  end
+
+  def validate
+    if self.attachment_id
+      file = DomainFile.find self.attachment_id
+      unless self.valid_file_size?(file.file_size)
+	errors.add_to_base('Attachment is too large')
+      end
+    end
+  end
 end

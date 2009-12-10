@@ -40,4 +40,12 @@ class ForumCategory < DomainModel
   def can_add_attachments_to_posts?
     self.allow_attachments && self.upload_folder
   end
+
+  def valid_file_size?(size)
+    if self.file_size_limit && self.file_size_limit > 0
+      size <= self.file_size_limit
+    else
+      true
+    end
+  end
 end

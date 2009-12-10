@@ -54,4 +54,8 @@ class ForumForum < DomainModel
   def upload_folder_id
     self.forum_category.folder_id
   end
+
+  def valid_file_size?(size)
+    self.forum_category.valid_file_size?(size)
+  end
 end
