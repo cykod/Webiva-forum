@@ -82,8 +82,13 @@ class ForumPost < DomainModel
   end
 
   def attachment
+    return @attachment if @attachment
     file = self.forum_post_attachments.find(:first)
-    file ? file.domain_file : nil
+    if file
+      @attachment = file.domain_file
+    else
+      nil
+    end
   end
 
   def attachment_id

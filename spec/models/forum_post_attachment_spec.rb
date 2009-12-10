@@ -2,11 +2,11 @@ require  File.expand_path(File.dirname(__FILE__)) + "/../../../../../spec/spec_h
 
 require  File.expand_path(File.dirname(__FILE__)) + '/../forum_test_helper'
 
-describe ForumSubscription do
+describe ForumPostAttachment do
 
   include ForumTestHelper
 
-  reset_domain_tables :forum_forums,:forum_posts,:forum_categories,:forum_topics,:end_users
+  reset_domain_tables :forum_forums,:forum_posts,:forum_categories,:forum_topics,:end_users,:forum_post_attachments
 
   it 'Initial test data validation' do
     @user = create_end_user
@@ -25,7 +25,7 @@ describe ForumSubscription do
     @topic.forum_posts.size.should == 1
   end
 
-  describe 'Detailed forum subscription testing' do
+  describe 'Detailed forum post attachment testing' do
 
     before(:each) do
       @user = create_end_user
@@ -42,19 +42,14 @@ describe ForumSubscription do
       @topic.reload
     end
 
-    it "should require a end_user_id, forum_forum_id and forum_topic_id" do
-      @subscription = ForumSubscription.new()
+    it "should require a end_user_id, forum_post_id and domain_file_id" do
+      @attachment = ForumPostAttachment.new()
 
-      @subscription.valid?
+      @attachment.valid?
 
-      @subscription.should have(1).errors_on(:end_user_id)
-      @subscription.should have(1).errors_on(:forum_topic_id)
-      @subscription.should have(1).errors_on(:forum_forum_id)
-    end
-
-    it "should create a valid subscription from topic.build_subscription" do
-      @subscription = @topic.build_subscription @user
-      @subscription.save.should be_true
+      @attachment.should have(1).errors_on(:end_user_id)
+      @attachment.should have(1).errors_on(:forum_post_id)
+      @attachment.should have(1).errors_on(:domain_file_id)
     end
   end
 end

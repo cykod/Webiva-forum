@@ -119,6 +119,12 @@ class Forum::PageFeature < ParagraphFeature
                 <div class="body">
                   <cms:subject><strong><cms:value/></strong></cms:subject>
                   <cms:body/>
+                  <cms:attachment>
+                    <cms:image size="small"/>
+                    <cms:no_image>
+                      <br/><a href="<cms:url/>">Download Attachment</a>
+                    </cms:no_image>
+                  </cms:attachment>
                 </div>
               </div>
             </cms:post>
@@ -262,6 +268,24 @@ class Forum::PageFeature < ParagraphFeature
     context.h_tag(base + ':subject') { |t| t.locals.post.subject }
     context.h_tag(base + ':posted_by') { |t| t.locals.post.posted_by }
     context.value_tag(base + ':body') { |t| t.locals.post.body_html }
+
+    context.expansion_tag(base + ':attachment') { |t| t.locals.post.attachment }
+      context.image_tag(base + ':attachment:image') do |t|
+        if t.locals.post.attachment && t.locals.post.attachment.file_type_match('img')
+	  t.locals.post.attachment
+	else
+	  nil
+	end
+      end
+
+      context.value_tag(base + ':attachment:url') do |t|
+        if t.locals.post.attachment
+	  t.locals.post.attachment.full_url
+	else
+	  nil
+	end
+      end
+
     context.date_tag(base + ':edited_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.post.edited_at }
     context.value_tag(base + ':edited_ago') { |t| time_ago_in_words(t.locals.post.edited_at) }
     context.date_tag(base + ':posted_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.post.posted_at }
