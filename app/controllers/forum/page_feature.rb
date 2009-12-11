@@ -20,7 +20,6 @@ class Forum::PageFeature < ParagraphFeature
           </cms:forum>
         </cms:forums>
       </cms:category>
-      <cms:pages/>
     </cms:categories>
   FEATURE
 
@@ -30,7 +29,6 @@ class Forum::PageFeature < ParagraphFeature
         add_category_features(c, data)
           c.loop_tag('category:forum') { |t| t.locals.category.main_forums }
             add_forum_features(c, data, 'category:forum')
-      c.pagelist_tag('pages', :field => 'forum_page' ) { |t| data[:pages] }
     end
   end
 

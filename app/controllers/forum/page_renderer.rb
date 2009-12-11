@@ -17,9 +17,17 @@ class Forum::PageRenderer < ParagraphRenderer
   def categories
     @options = paragraph_options(:categories)
 
-    @pages, @categories = ForumCategory.paginate(params[:forum_page], :per_page => @options.categories_per_page, :order => 'name' )
+    display_string = "#{paragraph.id}"
 
-    render_paragraph :feature => :forum_page_categories
+    output = ForumCategory.cache_fetch_list(display_string) unless editor?
+
+    if ! output
+      @categories = ForumCategory.find(:all, :order => 'name' )
+      output = forum_page_categories_feature
+      ForumCategory.cache_put_list(display_string, output) unless editor?
+    end
+
+    render_paragraph :text => output
   end
 
   def list
@@ -29,21 +37,31 @@ class Forum::PageRenderer < ParagraphRenderer
       @category = ForumCategory.find(:first)
     elsif @options.forum_category_id.blank?
       conn_type, conn_id = page_connection
-      @category = ForumCategory.find_by_url conn_id
+      @category = ForumCategory.find_by_url conn_id if conn_type == :url
       raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @category
     else
       @category = ForumCategory.find @options.forum_category_id
       raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @category
     end
 
-    if @category
-      set_page_connection :category, @category
-      @pages, @forums = @category.forum_forums.paginate(params[:forum_page], :per_page => @options.forums_per_page, :order => 'weight DESC, name' )
+    forum_page = (params[:forum_page] || 1).to_i
+    display_string = "#{paragraph.id}_#{forum_page}"
+
+    output = @category.cache_fetch(display_string, :url) unless editor?
+    if ! output
+      @pages, @forums = @category.forum_forums.paginate(forum_page, :per_page => @options.forums_per_page, :order => 'weight DESC, name' )
+      output = forum_page_list_feature
+
+      @category.cache_put(display_string, output, :url) unless editor?
     end
 
-    set_title @category.name, 'category'
+    if ! output
+      return render_paragraph :text => ''
+    end
 
-    render_paragraph :feature => :forum_page_list
+    set_page_connection :category, @category
+    set_title @category.name, 'category'
+    render_paragraph :text => output
   end
 
   def forum
@@ -60,26 +78,39 @@ class Forum::PageRenderer < ParagraphRenderer
       raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
     else
       conn_type, conn_id = page_connection(:forum)
-      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless conn_type == :url
-
-      @forum = ForumForum.find_by_url conn_id
+      @forum = ForumForum.find_by_url conn_id if conn_type == :url
       raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
+    end
 
-      conn_type, conn_id = page_connection(:topic)
-      if conn_type == :id
-	@topic = @forum.forum_topics.find_by_id conn_id
+    forum_page = (params[:forum_page] || 1).to_i
+    display_string = "#{paragraph.id}_#{forum_page}"
+
+    output = nil
+    conn_type, conn_id = page_connection(:topic)
+
+    must_fetch_topic = (conn_type == :id && conn_id)
+
+    if ! editor?
+      output = must_fetch_topic ? ForumTopic.cache_fetch(display_string, conn_id.to_i) : @forum.cache_fetch(display_string, :url)
+    end
+
+    if ! output
+      @topic = @forum.forum_topics.find_by_id conn_id.to_i if must_fetch_topic
+
+      if @forum && ! must_fetch_topic
+	@pages, @topics = @forum.forum_topics.paginate(forum_page, :per_page => @options.topics_per_page, :order => 'sticky DESC, created_at DESC')
+      end
+
+      output = forum_page_forum_feature
+
+      if ! editor?
+	must_fetch_topic ? @topic.cache_put(display_string, output) : @forum.cache_put(display_string, output, :url)
       end
     end
 
-    if @forum && @topic.nil?
-      @pages, @topics = @forum.forum_topics.paginate(params[:forum_page], :per_page => @options.topics_per_page, :order => 'sticky, created_at DESC')
-    end
-
     set_page_connection :forum, @forum
-
     set_title @forum.name, 'forum'
-
-    render_paragraph :feature => :forum_page_forum
+    render_paragraph :text => output
   end
 
   def topic
@@ -103,18 +134,25 @@ class Forum::PageRenderer < ParagraphRenderer
       end
 
       conn_type, conn_id = page_connection(:topic)
-      if conn_type == :id
-	@topic = @forum.forum_topics.find_by_id conn_id if @forum
+      if conn_type == :id && conn_id && @forum
+	@topic = @forum.forum_topics.find_by_id conn_id
       end
     end
 
     if @topic
+      posts_page = (params[:posts_page] || 1).to_i
+      display_string = "#{paragraph.id}_#{posts_page}"
+      output = @topic.cache_fetch(display_string) unless editor?
+
+      if ! output
+	@pages, @posts = @topic.forum_posts.approved_posts.paginate(posts_page, :per_page => @options.posts_per_page, :order => 'posted_at')
+	output = forum_page_topic_feature
+	@topic.cache_put(display_string, output) unless editor?
+      end
+
       set_page_connection :topic, @topic
-      @pages, @posts = @topic.forum_posts.approved_posts.paginate(params[:posts_page], :per_page => @options.posts_per_page, :order => 'posted_at')
-
       set_title @topic.subject[0..68], 'subject'
-
-      render_paragraph :feature => :forum_page_topic
+      render_paragraph :text => output
     else
       render_paragraph :text => ''
     end

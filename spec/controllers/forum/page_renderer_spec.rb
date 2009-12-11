@@ -51,7 +51,7 @@ describe Forum::PageRenderer, :type => :controller do
       @rnd = generate_page_renderer('categories')
       @rnd.should_render_feature('forum_page_categories')
       
-      ForumCategory.should_receive(:paginate)
+      ForumCategory.should_receive(:find)
       renderer_get @rnd
     end
 
@@ -77,7 +77,7 @@ describe Forum::PageRenderer, :type => :controller do
 
     it "should be able to list forums for a category in editor mode" do
       @rnd = generate_page_renderer('list')
-      @rnd.should_receive(:editor?).and_return(true)
+      @rnd.should_receive(:editor?).at_least(:once).and_return(true)
       @rnd.should_render_feature('forum_page_list')
 
       ForumForum.should_receive(:paginate)
@@ -86,16 +86,16 @@ describe Forum::PageRenderer, :type => :controller do
 
     it "should be able to list topics for forum in editor mode" do
       @rnd = generate_page_renderer('forum')
-      @rnd.should_receive(:editor?).and_return(true)
-      @rnd.should_render_feature('forum_page_forum')
+      @rnd.should_receive(:editor?).at_least(:once).and_return(true)
+      @rnd.should_receive(:forum_page_forum_feature)
 
       ForumTopic.should_receive(:paginate)
       renderer_get @rnd
 
       options = { :forum_forum_id => @forum.id }
       @rnd = generate_page_renderer('forum', options)
-      @rnd.should_receive(:editor?).and_return(true)
-      @rnd.should_render_feature('forum_page_forum')
+      @rnd.should_receive(:editor?).at_least(:once).and_return(true)
+      @rnd.should_receive(:forum_page_forum_feature)
 
       ForumForum.should_receive(:find_by_id).and_return(@forum)
       ForumTopic.should_receive(:paginate)
@@ -106,7 +106,7 @@ describe Forum::PageRenderer, :type => :controller do
       options = { :forum_forum_id => nil }
       inputs = { :forum => [:url, @forum.url] }
       @rnd = generate_page_renderer('forum', options, inputs)
-      @rnd.should_render_feature('forum_page_forum')
+      @rnd.should_receive(:forum_page_forum_feature)
 
       ForumForum.should_receive(:find_by_url).and_return(@forum)
       ForumTopic.should_receive(:paginate)
@@ -116,7 +116,7 @@ describe Forum::PageRenderer, :type => :controller do
     it "should be able to list topics for a forum id" do
       options = { :forum_forum_id => @forum.id }
       @rnd = generate_page_renderer('forum', options)
-      @rnd.should_render_feature('forum_page_forum')
+      @rnd.should_receive(:forum_page_forum_feature)
 
       ForumForum.should_receive(:find).and_return(@forum)
       ForumTopic.should_receive(:paginate)
@@ -127,7 +127,7 @@ describe Forum::PageRenderer, :type => :controller do
       options = { :forum_forum_id => nil }
       inputs = { :forum => [:url, @forum.url], :topic => [:id, @topic.id] }
       @rnd = generate_page_renderer('forum', options, inputs)
-      @rnd.should_render_feature('forum_page_forum')
+      @rnd.should_receive(:forum_page_forum_feature)
 
       ForumForum.should_receive(:find_by_url).and_return(@forum)
       ForumTopic.should_receive(:find_by_id).and_return(@topic)
@@ -137,7 +137,7 @@ describe Forum::PageRenderer, :type => :controller do
 
     it "should be able to list posts for a topic in editor mode" do
       @rnd = generate_page_renderer('topic')
-      @rnd.should_receive(:editor?).and_return(true)
+      @rnd.should_receive(:editor?).at_least(:once).and_return(true)
       @rnd.should_render_feature('forum_page_topic')
 
       ForumPost.should_receive(:paginate)
@@ -145,7 +145,7 @@ describe Forum::PageRenderer, :type => :controller do
 
       options = { :forum_forum_id => @forum.id }
       @rnd = generate_page_renderer('topic', options)
-      @rnd.should_receive(:editor?).and_return(true)
+      @rnd.should_receive(:editor?).at_least(:once).and_return(true)
       @rnd.should_render_feature('forum_page_topic')
 
       ForumForum.should_receive(:find_by_id).and_return(@forum)
@@ -183,14 +183,14 @@ describe Forum::PageRenderer, :type => :controller do
       mock_user
 
       @rnd = generate_page_renderer('new_post')
-      @rnd.should_receive(:editor?).and_return(true)
+      @rnd.should_receive(:editor?).at_least(:once).and_return(true)
       @rnd.should_render_feature('forum_page_new_post')
 
       renderer_get @rnd
 
       options = { :forum_forum_id => @forum.id }
       @rnd = generate_page_renderer('new_post', options)
-      @rnd.should_receive(:editor?).and_return(true)
+      @rnd.should_receive(:editor?).at_least(:once).and_return(true)
       @rnd.should_render_feature('forum_page_new_post')
 
       ForumForum.should_receive(:find_by_id).and_return(@forum)
@@ -290,7 +290,7 @@ describe Forum::PageRenderer, :type => :controller do
 
     it "should be able to display recent topics form editor mode" do
       @rnd = generate_page_renderer('recent')
-      @rnd.should_receive(:editor?).and_return(true)
+      @rnd.should_receive(:editor?).at_least(:once).and_return(true)
       @rnd.should_render_feature('forum_page_recent')
 
       ForumTopic.should_receive(:paginate)
@@ -298,7 +298,7 @@ describe Forum::PageRenderer, :type => :controller do
 
       options = { :forum_category_id => @cat.id }
       @rnd = generate_page_renderer('recent', options)
-      @rnd.should_receive(:editor?).and_return(true)
+      @rnd.should_receive(:editor?).at_least(:once).and_return(true)
       @rnd.should_render_feature('forum_page_recent')
 
       ForumCategory.should_receive(:find_by_id).and_return(@cat)
@@ -307,7 +307,7 @@ describe Forum::PageRenderer, :type => :controller do
 
       options = { :forum_forum_id => @forum.id }
       @rnd = generate_page_renderer('recent', options)
-      @rnd.should_receive(:editor?).and_return(true)
+      @rnd.should_receive(:editor?).at_least(:once).and_return(true)
       @rnd.should_render_feature('forum_page_recent')
 
       ForumForum.should_receive(:find_by_id).and_return(@forum)
