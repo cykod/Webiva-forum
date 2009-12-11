@@ -367,8 +367,7 @@ describe Forum::PageRenderer, :type => :controller do
       @rnd = generate_page_renderer('recent', options, inputs)
       @rnd.should_render_feature('forum_page_recent')
 
-      ForumCategory.should_receive(:find_by_url).and_return(@cat)
-      @cat.forum_forums.should_receive(:find_by_url).and_return(@forum)
+      ForumForum.should_receive(:find_by_url).and_return(@forum)
       ForumTopic.should_receive(:paginate)
       renderer_get @rnd
     end
@@ -376,7 +375,7 @@ describe Forum::PageRenderer, :type => :controller do
     it "should be able to display recent topics for forum and content" do
       @content = ['content_test', 1]
       options = { :forum_forum_id => @forum.id }
-      inputs = { :input => [:content, @content] }
+      inputs = { :content => [:content, @content] }
       @rnd = generate_page_renderer('recent', options, inputs)
       @rnd.should_render_feature('forum_page_recent')
 

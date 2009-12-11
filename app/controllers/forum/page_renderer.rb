@@ -37,7 +37,7 @@ class Forum::PageRenderer < ParagraphRenderer
       @category = ForumCategory.find(:first)
     elsif @options.forum_category_id.blank?
       conn_type, conn_id = page_connection
-      @category = ForumCategory.find_by_url conn_id if conn_type == :url
+      @category = ForumCategory.find_by_url conn_id if conn_type == :url && ! conn_id.blank?
       raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @category
     else
       @category = ForumCategory.find @options.forum_category_id
@@ -78,7 +78,7 @@ class Forum::PageRenderer < ParagraphRenderer
       raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
     else
       conn_type, conn_id = page_connection(:forum)
-      @forum = ForumForum.find_by_url conn_id if conn_type == :url
+      @forum = ForumForum.find_by_url conn_id if conn_type == :url && ! conn_id.blank?
       raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
     end
 
@@ -88,7 +88,7 @@ class Forum::PageRenderer < ParagraphRenderer
     output = nil
     conn_type, conn_id = page_connection(:topic)
 
-    must_fetch_topic = (conn_type == :id && conn_id)
+    must_fetch_topic = (conn_type == :id && ! conn_id.blank?)
 
     if ! editor?
       output = must_fetch_topic ? ForumTopic.cache_fetch(display_string, conn_id.to_i) : @forum.cache_fetch(display_string, :url)
@@ -126,17 +126,13 @@ class Forum::PageRenderer < ParagraphRenderer
     else
       if @options.forum_forum_id.blank?
 	conn_type, conn_id = page_connection(:forum)
-	if conn_type == :url
-	  @forum = ForumForum.find_by_url conn_id
-	end
+	@forum = ForumForum.find_by_url conn_id if conn_type == :url && ! conn_id.blank?
       else
 	@forum = ForumForum.find @options.forum_forum_id
       end
 
       conn_type, conn_id = page_connection(:topic)
-      if conn_type == :id && conn_id && @forum
-	@topic = @forum.forum_topics.find_by_id conn_id
-      end
+      @topic = @forum.forum_topics.find_by_id conn_id if conn_type == :id && ! conn_id.blank? && @forum
     end
 
     if @topic
@@ -180,9 +176,7 @@ class Forum::PageRenderer < ParagraphRenderer
 	  raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
 
 	  conn_type, conn_id = page_connection(:topic)
-	  if conn_type == :id && ! conn_id.blank?
-	    @topic = @forum.forum_topics.find conn_id
-	  end
+	  @topic = @forum.forum_topics.find conn_id if conn_type == :id && ! conn_id.blank?
 	else
 	  return render_paragraph :text => '[Configure page connections]'
 	end
@@ -235,6 +229,70 @@ class Forum::PageRenderer < ParagraphRenderer
   end
 
   def recent
+    return render_paragraph :text => '[Configure Page Connections]' unless recent_options
+
+    forum_page = (params[:forum_page] || 1).to_i
+    display_string = "#{paragraph.id}_#{forum_page}"
+    if @content
+      display_string << "_#{@content[0]}_#{@content[1]}"
+    end
+
+    output = nil
+    category_title = nil
+    forum_title = nil
+    default_title = nil
+
+    if ! editor?
+      if @forum_url
+	default_title, forum_title, category_title, output = ForumForum.cache_fetch(display_string, @forum_url)
+      elsif @category_path
+	default_title, forum_title, category_title, output = ForumCategory.cache_fetch(display_string, @category_path)
+      end
+    end
+
+    if ! output
+      if @forum_url
+	@forum = ForumForum.find_by_url @forum_url unless @forum
+	raise MissingPageException.new( site_node, language ) unless @forum
+
+	@category = @forum.forum_category unless @category
+	raise MissingPageException.new( site_node, language ) unless @category.url == @category_path
+
+	if @content
+	  @pages, @topics = @forum.forum_topics.topics_for_content(*@content).order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
+	else
+	  @pages, @topics = @forum.forum_topics.order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
+	end
+      elsif @category_path
+	@category = ForumCategory.find_by_url @category_path unless @category
+	raise MissingPageException.new( site_node, language ) unless @category
+
+	@pages, @topics = @category.forum_topics.order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
+      end
+
+      category_title = @category.name
+      forum_title = @forum ? @forum.name : ''
+      default_title = @forum ? @forum.name : @category.name
+      output = forum_page_recent_feature
+
+      if ! editor?
+	if @forum
+	  @forum.cache_put(display_string, [default_title, forum_title, category_title, output], :url)
+	else
+	  @category.cache_put(display_string, [default_title, forum_title, category_title, output], :url)
+	end
+      end
+    end
+
+    set_title category_title, 'category'
+    set_title forum_title, 'forum' if ! forum_title.blank?
+    set_title default_title
+    render_paragraph :text => output
+  end
+
+  protected
+
+  def recent_options
     @options = paragraph_options(:recent)
 
     if editor?
@@ -248,14 +306,11 @@ class Forum::PageRenderer < ParagraphRenderer
       end
     elsif ! @options.forum_category_id.blank?
       @category = ForumCategory.find @options.forum_category_id
+      conn_type, conn_id = page_connection(:forum)
+      @forum_url = conn_id if ! conn_id.blank? && conn_type == :url
     elsif ! @options.forum_forum_id.blank?
       @forum = ForumForum.find @options.forum_forum_id
       @category = @forum.forum_category
-
-      conn_type, conn_id = page_connection
-      if conn_type == :content
-	@content = conn_id
-      end
     else
       conn_type, conn_id = page_connection
 
@@ -265,34 +320,21 @@ class Forum::PageRenderer < ParagraphRenderer
 	@forum = conn_id
 	@category = @forum.forum_category
       elsif conn_type == :category_path
-	@category = ForumCategory.find_by_url conn_id
-	raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @category
+	@category_path = conn_id if ! conn_id.blank?
 
 	conn_type, conn_id = page_connection(:forum)
-	if ! conn_id.blank? && conn_type == :url
-	  @forum = @category.forum_forums.find_by_url conn_id
-	  raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
-	end
+	@forum_url = conn_id if ! conn_id.blank? && conn_type == :url
       else
-	return render_paragraph :text => '[Configure page connections]'
+	return false
       end
     end
 
-    if @forum
-      if @content
-	@pages, @topics = @forum.forum_topics.topics_for_content(*@content).order_by_recent_topics(1.day.ago).paginate(params[:forum_page], :per_page => @options.topics_per_page)
-      else
-	@pages, @topics = @forum.forum_topics.order_by_recent_topics(1.day.ago).paginate(params[:forum_page], :per_page => @options.topics_per_page)
-      end
-    elsif @category
-      @pages, @topics = @category.forum_topics.order_by_recent_topics(1.day.ago).paginate(params[:forum_page], :per_page => @options.topics_per_page)
-    end
+    conn_type, conn_id = page_connection(:content)
+    @content = conn_id if conn_type == :content && ! conn_id.blank?
 
-    set_title @category.name, 'category' if @category
-    set_title @forum.name, 'forum' if @forum
-    set_title @forum ? @forum.name : @category.name
+    @category_path = @category.url if @category
+    @forum_url = @forum.url if @forum
 
-    render_paragraph :feature => :forum_page_recent
+    true
   end
-
 end

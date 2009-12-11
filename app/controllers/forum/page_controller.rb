@@ -30,9 +30,9 @@ class Forum::PageController < ParagraphController
   editor_for :recent, :name => "Recent Posts Display", :feature => :forum_page_recent,
                       :inputs => { :input => [[:category, 'Category', :forum_category_target],
                                               [:forum, 'Forum', :forum_forum_target],
-                                              [:category_path, 'Forum Category Url', :path],
-                                              [:content, 'Content Identifier (only used when Forum is set)', :content]],
-                                   :forum => [[:url, 'Forum Url (only used with Forum Category Url)', :path]]
+                                              [:category_path, 'Forum Category Url', :path]],
+                                   :forum => [[:url, 'Forum Url (only used with Forum Category Url)', :path]],
+                                   :content => [[:content, 'Content Identifier', :content]]
                                  }
 
   class CategoriesOptions < HashModel
