@@ -372,5 +372,40 @@ describe Forum::PageRenderer, :type => :controller do
       ForumTopic.should_receive(:paginate)
       renderer_get @rnd
     end
+
+    it "should be able to display recent topics for forum and content" do
+      @content = ['content_test', 1]
+      options = { :forum_forum_id => @forum.id }
+      inputs = { :input => [:content, @content] }
+      @rnd = generate_page_renderer('recent', options, inputs)
+      @rnd.should_render_feature('forum_page_recent')
+
+      ForumForum.should_receive(:find).and_return(@forum)
+      @forum.forum_topics.should_receive(:topics_for_content).with(*@content).and_return(@forum.forum_topics)
+      ForumTopic.should_receive(:paginate)
+      renderer_get @rnd
+    end
+
+    it "should be able to create a new topic for content" do
+      mock_user
+
+      @content = ['content_test', 1]
+      @topic_page_node = SiteNode.create(:node_type => 'P', :title => 'topic')
+      options = {:forum_page_id => @topic_page_node.id, :forum_forum_id => @forum.id}
+      inputs = { :input => [:content, @content] } 
+      @rnd = generate_page_renderer('new_post', options, inputs)
+
+      renderer_post @rnd, { :post => {:body => 'My Test Post', :subject => 'My Test Subject'} }
+
+      @post = ForumPost.find(:first, :order => 'id DESC')
+      @post.body.should == 'My Test Post'
+      @post.subject.should == 'My Test Subject'
+      @post.forum_topic.subject.should == 'My Test Subject'
+      @post.forum_topic.content_type.should == 'content_test'
+      @post.forum_topic.content_id.should == 1
+
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+    end
+
   end
 end

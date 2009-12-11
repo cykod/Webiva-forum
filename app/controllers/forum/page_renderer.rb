@@ -150,6 +150,11 @@ class Forum::PageRenderer < ParagraphRenderer
 	end
       else
 	@forum = ForumForum.find @options.forum_forum_id
+
+	conn_type, conn_id = page_connection
+	if conn_type == :content
+	  @content = conn_id
+	end
       end
     end
 
@@ -163,6 +168,11 @@ class Forum::PageRenderer < ParagraphRenderer
 
     @post = @topic ? @topic.build_post : @forum.forum_posts.build
     @post.end_user = myself
+
+    if @content
+      @post.content_type = @content[0]
+      @post.content_id = @content[1]
+    end
 
     if request.post? && params[:post]
       if @post.can_add_attachments?
@@ -203,6 +213,11 @@ class Forum::PageRenderer < ParagraphRenderer
     elsif ! @options.forum_forum_id.blank?
       @forum = ForumForum.find @options.forum_forum_id
       @category = @forum.forum_category
+
+      conn_type, conn_id = page_connection
+      if conn_type == :content
+	@content = conn_id
+      end
     else
       conn_type, conn_id = page_connection
 
@@ -226,9 +241,13 @@ class Forum::PageRenderer < ParagraphRenderer
     end
 
     if @forum
-      @pages, @topics = @forum.forum_topics.recent_topics.paginate(params[:forum_page], :per_page => @options.topics_per_page, :order => 'activity_count')
+      if @content
+	@pages, @topics = @forum.forum_topics.topics_for_content(*@content).order_by_recent_topics(1.day.ago).paginate(params[:forum_page], :per_page => @options.topics_per_page)
+      else
+	@pages, @topics = @forum.forum_topics.order_by_recent_topics(1.day.ago).paginate(params[:forum_page], :per_page => @options.topics_per_page)
+      end
     elsif @category
-      @pages, @topics = @category.forum_topics.recent_topics.paginate(params[:forum_page], :per_page => @options.topics_per_page, :order => 'activity_count')
+      @pages, @topics = @category.forum_topics.order_by_recent_topics(1.day.ago).paginate(params[:forum_page], :per_page => @options.topics_per_page)
     end
 
     set_title @category.name, 'category' if @category

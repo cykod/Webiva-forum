@@ -14,7 +14,8 @@ class ForumTopic < DomainModel
   belongs_to :last_post, :class_name => 'ForumPost'
 
   named_scope :sticky_topics, :conditions => 'forum_topics.sticky > 0'
-  named_scope :recent_topics, :conditions => ['forum_topics.updated_at > ? and forum_topics.activity_count > 0', 1.day.ago]
+  named_scope :order_by_recent_topics, lambda { |from| {:order => sanitize_sql_for_conditions(['if(`forum_topics`.last_posted_at > ?, `forum_topics`.activity_count, 0) DESC, `forum_topics`.last_posted_at DESC', from]) }}
+  named_scope :topics_for_content, lambda { |type, id| {:conditions => ['`forum_topics`.content_type = ? and `forum_topics`.content_id = ?', type, id]} }
 
   def build_post(options={})
     self.forum_posts.build( {:forum_forum_id => self.forum_forum_id}.merge(options) )

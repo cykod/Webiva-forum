@@ -55,7 +55,8 @@ class ForumPost < DomainModel
   def before_create
     if self.forum_topic.nil?
       self.create_forum_topic :subject => self.subject, :posted_by => self.posted_by,
-	                      :end_user_id => self.end_user_id, :forum_forum_id => self.forum_forum_id
+	                      :end_user_id => self.end_user_id, :forum_forum_id => self.forum_forum_id,
+	                      :content_type => self.content_type, :content_id => self.content_id
     end
 
     self.first_post = self.forum_topic.forum_posts.count == 0
@@ -64,6 +65,7 @@ class ForumPost < DomainModel
 
   def after_create
     self.forum_topic.last_post = self
+    self.forum_topic.last_posted_at = self.posted_at
     self.forum_topic.refresh_activity_count
     self.forum_topic.refresh_posts_count
     self.forum_topic.save
@@ -103,6 +105,24 @@ class ForumPost < DomainModel
 
   def attachment_id=(id)
     @attachment_id = id.to_i
+  end
+
+  def content_id
+    return @content_id if @content_id
+    @content_id = self.forum_topic ? self.forum_topic.content_id : nil
+  end
+
+  def content_id=(id)
+    @content_id = id.to_i
+  end
+
+  def content_type
+    return @content_type if @content_type
+    @content_type = self.forum_topic ? self.forum_topic.content_type : nil
+  end
+
+  def content_type=(type)
+    @content_type = type
   end
 
   def after_save

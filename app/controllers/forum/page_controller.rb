@@ -22,14 +22,16 @@ class Forum::PageController < ParagraphController
   editor_for :new_post, :name => "New Post Form", :feature => :forum_page_new_post,
                         :inputs => { :input => [[:forum, 'Forum', :forum_forum_target],
                                                 [:topic, 'Topic', :forum_topic_target],
-                                                [:forum_path, 'Forum Url', :path]],
+                                                [:forum_path, 'Forum Url', :path],
+                                                [:content, 'Content Identifier (only used when Forum is set)', :content]],
                                      :topic => [[:id, 'Topic Id (only used with Forum Url)', :path]]
                                    }
 
   editor_for :recent, :name => "Recent Posts Display", :feature => :forum_page_recent,
                       :inputs => { :input => [[:category, 'Category', :forum_category_target],
                                               [:forum, 'Forum', :forum_forum_target],
-                                              [:category_path, 'Forum Category Url', :path]],
+                                              [:category_path, 'Forum Category Url', :path],
+                                              [:content, 'Content Identifier (only used when Forum is set)', :content]],
                                    :forum => [[:url, 'Forum Url (only used with Forum Category Url)', :path]]
                                  }
 

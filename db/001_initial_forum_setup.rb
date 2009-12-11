@@ -41,7 +41,10 @@ class InitialForumSetup < ActiveRecord::Migration
       t.string :subject
       t.integer :forum_posts_count, :default => 0
       t.integer :last_post_id
+      t.datetime :last_posted_at
       t.integer :activity_count, :default => 0
+      t.string :content_type
+      t.integer :content_id
 
       t.integer :sticky, :default => 0
 
@@ -49,7 +52,8 @@ class InitialForumSetup < ActiveRecord::Migration
     end
     
     add_index :forum_topics, [ :forum_forum_id, :created_at ], :name => 'forum_forum_id'
-    add_index :forum_topics, [ :forum_forum_id, :updated_at, :activity_count ], :name => 'forum_activity'
+    add_index :forum_topics, [ :forum_forum_id, :last_posted_at, :activity_count ], :name => 'forum_activity'
+    add_index :forum_topics, [ :content_type, :content_id ], :name => 'topic_content'
     
     create_table :forum_posts, :force => true do |t|
       t.boolean :first_post, :default => false

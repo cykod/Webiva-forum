@@ -106,7 +106,7 @@ describe Forum::PageFeature, :type => :view do
       @options = Forum::PageController::RecentOptions.new( {:category_page_id => @category_page_node.id,
 							    :forum_page_id => @forum_page_node.id} )
 
-      @pages, @topics = @forum.forum_topics.recent_topics.paginate(nil, :per_page => @options.topics_per_page, :order => 'activity_count')
+      @pages, @topics = @forum.forum_topics.order_by_recent_topics(1.day.ago).paginate(nil, :per_page => @options.topics_per_page)
       @output = @feature.forum_page_recent_feature({:topics => @topics, :forum => @forum, :category => @category, :pages => @pages, :options => @options})
       @output.should include( @topic.subject )
     end
