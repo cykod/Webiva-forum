@@ -121,7 +121,8 @@ class Forum::PageRenderer < ParagraphRenderer
       display_string = "#{posts_page}"
 
       skip = false
-      if @topic.subscribe?(myself)
+      default_subscription_template_id = Forum::AdminController.module_options.subscription_template_id
+      if @topic.subscribe?(myself, default_subscription_template_id)
 	display_string << "_#{myself.id}"
 	@subscription = ForumSubscription.find_by_end_user_id_and_forum_topic_id(myself.id, @topic.id)
 	@subscription = @topic.build_subscription(myself) if @subscription.nil?
@@ -218,7 +219,8 @@ class Forum::PageRenderer < ParagraphRenderer
 	  posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
 	end
 
-	@post.send_subscriptions!( {:url => posts_url, :subject => @post.subject, :message => @post.body}, nil )
+	default_subscription_template_id = Forum::AdminController.module_options.subscription_template_id
+	@post.send_subscriptions!( {:url => posts_url, :subject => @post.subject, :message => @post.body}, default_subscription_template_id )
 	return redirect_paragraph posts_url
       end
     end

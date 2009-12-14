@@ -92,7 +92,11 @@ class ForumTopic < DomainModel
     end
   end
 
-  def subscribe?(end_user)
-    end_user.id ? true : false
+  def subscribe?(end_user, default_subscription_template_id)
+    if end_user.id && (default_subscription_template_id || forum_forum.subscription_template)
+      true
+    else
+      false
+    end
   end
 end
