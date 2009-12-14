@@ -117,24 +117,33 @@ class Forum::PageFeature < ParagraphFeature
     <cms:category>
       <cms:forum>
         <cms:topic>
+          <cms:subscription>
+            <cms:form/>
+          </cms:subscription>
+          <table>
           <cms:posts>
             <cms:post>
-              <div class="post">
-                <div class="by"><cms:posted_by/></div>
-                <div class="date">Posted <cms:posted_ago/> ago</div>
-                <div class="body">
-                  <cms:subject><strong><cms:value/></strong></cms:subject>
-                  <cms:body/>
-                  <cms:attachment>
-                    <cms:image size="small"/>
-                    <cms:no_image>
-                      <br/><a href="<cms:url/>"><img src="<cms:thumbnail_url/>" width="32"></a> Download <a href="<cms:url/>"><cms:name/></a>
-                    </cms:no_image>
-                  </cms:attachment>
-                </div>
-              </div>
+            <tr>
+              <td>
+                <span class="by"><cms:posted_by/></span><br/>
+                <span class="date">Posted <cms:posted_ago/> ago</span>
+              </td>
+              <td class="body">
+                <cms:subject><strong><cms:value/></strong></cms:subject>
+                <cms:body/>
+                <cms:attachment>
+                  <div class="attachment">
+                  <cms:image size="small"/>
+                  <cms:no_image>
+                    <br/><a href="<cms:url/>"><img src="<cms:thumbnail_url/>" width="32"></a> Download <a href="<cms:url/>"><cms:name/></a>
+                  </cms:no_image>
+                  </div>
+                </cms:attachment>
+              </td>
+            </tr>
             </cms:post>
           </cms:posts>
+          </table>
         </cms:topic>
       </cms:forum>
       <cms:pages/>
@@ -151,6 +160,26 @@ class Forum::PageFeature < ParagraphFeature
 
       c.expansion_tag('forum:topic') { |t| t.locals.topic = data[:topic] }
       add_topic_features(c, data, 'forum:topic')
+
+      c.expansion_tag('forum:topic:subscription') { |t| t.locals.subscription = data[:subscription] }
+      c.define_tag('forum:topic:subscription:form') do |t|
+        if t.single?
+          label = t.attr['label'] || "Subscribe to topic"
+        else
+          label = t.expand
+        end
+
+        confirm_message =  t.locals.subscription.subscribed? ? (t.attr['unsubscribe_message'] || 'Are you sure you want to unsubscribe from topic?') : (t.attr['subscribe_message'] || 'Subscribe to topic?' )
+
+        form_tag("") +
+          tag(:label,:for => 'subscribe') +
+          tag(:input,:type => 'hidden', :name => 'subscribe',:value => '') + 
+          tag(:input,:type => 'checkbox',
+              :id => 'subscribe',
+              :checked => t.locals.subscription.subscribed?,
+              :name => 'subscribe',
+              :onclick => "if(confirm('#{jvh confirm_message}')) { this.form.submit(); return true; } else { return false; }") + " " + h(label) + "</form>"
+      end
 
       c.loop_tag('forum:topic:post') { |t| data[:posts] }
         add_post_features(c, data, 'forum:topic:post')

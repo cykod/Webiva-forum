@@ -118,8 +118,28 @@ class Forum::PageRenderer < ParagraphRenderer
 
     if @topic
       posts_page = (params[:posts_page] || 1).to_i
+      display_string = "#{posts_page}"
 
-      result = renderer_cache(@topic, posts_page) do |cache|
+      skip = false
+      if @topic.subscribe?(myself)
+	display_string << "_#{myself.id}"
+	@subscription = ForumSubscription.find_by_end_user_id_and_forum_topic_id(myself.id, @topic.id)
+	@subscription = @topic.build_subscription(myself) if @subscription.nil?
+	display_string << "_#{@subscription.id ? 'u' : 's'}"
+	if request.post?
+	  skip = true
+	  if params[:subscribe] && params[:subscribe].blank?
+	    @subscription.destroy if @subscription.subscribed?
+	    @subscription = @topic.build_subscription(myself)
+	    flash[:notice] = 'Unsubscribed from topic';
+	  else
+	    @subscription.save unless @subscription.subscribed?
+	    flash[:notice] = 'Subscribed to topic';
+	  end
+	end
+      end
+
+      result = renderer_cache(@topic, display_string, :skip => skip) do |cache|
 	@pages, @posts = @topic.forum_posts.approved_posts.paginate(posts_page, :per_page => @options.posts_per_page, :order => 'posted_at')
 	cache[:output] = forum_page_topic_feature
       end

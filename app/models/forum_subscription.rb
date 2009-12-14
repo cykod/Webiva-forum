@@ -12,4 +12,16 @@ class ForumSubscription < DomainModel
     }
   })
 
+  def subscribe
+    return @subscribe if @subscribe
+    @subscribe = self.id ? true : false
+  end
+
+  def subscribe=(s)
+    @subscribe = s
+  end
+
+  def subscribed?
+    self.id ? true : false
+  end
 end
