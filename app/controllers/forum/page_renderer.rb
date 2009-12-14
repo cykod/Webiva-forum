@@ -17,17 +17,12 @@ class Forum::PageRenderer < ParagraphRenderer
   def categories
     @options = paragraph_options(:categories)
 
-    display_string = "#{paragraph.id}"
-
-    output = ForumCategory.cache_fetch_list(display_string) unless editor?
-
-    if ! output
+    result = renderer_cache(ForumCategory) do |cache|
       @categories = ForumCategory.find(:all, :order => 'name' )
-      output = forum_page_categories_feature
-      ForumCategory.cache_put_list(display_string, output) unless editor?
+      cache[:output] = forum_page_categories_feature
     end
 
-    render_paragraph :text => output
+    render_paragraph :text => result.output
   end
 
   def list
@@ -45,23 +40,19 @@ class Forum::PageRenderer < ParagraphRenderer
     end
 
     forum_page = (params[:forum_page] || 1).to_i
-    display_string = "#{paragraph.id}_#{forum_page}"
 
-    output = @category.cache_fetch(display_string, :url) unless editor?
-    if ! output
+    result = renderer_cache(@category, forum_page) do |cache|
       @pages, @forums = @category.forum_forums.paginate(forum_page, :per_page => @options.forums_per_page, :order => 'weight DESC, name' )
-      output = forum_page_list_feature
-
-      @category.cache_put(display_string, output, :url) unless editor?
+      cache[:output] = forum_page_list_feature
     end
 
-    if ! output
+    if ! result.output
       return render_paragraph :text => ''
     end
 
     set_page_connection :category, @category
     set_title @category.name, 'category'
-    render_paragraph :text => output
+    render_paragraph :text => result.output
   end
 
   def forum
@@ -83,34 +74,24 @@ class Forum::PageRenderer < ParagraphRenderer
     end
 
     forum_page = (params[:forum_page] || 1).to_i
-    display_string = "#{paragraph.id}_#{forum_page}"
-
-    output = nil
     conn_type, conn_id = page_connection(:topic)
-
     must_fetch_topic = (conn_type == :id && ! conn_id.blank?)
 
-    if ! editor?
-      output = must_fetch_topic ? ForumTopic.cache_fetch(display_string, conn_id.to_i) : @forum.cache_fetch(display_string, :url)
-    end
+    cache_obj = must_fetch_topic ? [ForumTopic, conn_id.to_i] : @forum
 
-    if ! output
+    result = renderer_cache(cache_obj, forum_page) do |cache|
       @topic = @forum.forum_topics.find_by_id conn_id.to_i if must_fetch_topic
 
       if @forum && ! must_fetch_topic
 	@pages, @topics = @forum.forum_topics.paginate(forum_page, :per_page => @options.topics_per_page, :order => 'sticky DESC, created_at DESC')
       end
 
-      output = forum_page_forum_feature
-
-      if ! editor?
-	must_fetch_topic ? @topic.cache_put(display_string, output) : @forum.cache_put(display_string, output, :url)
-      end
+      cache[:output] = forum_page_forum_feature
     end
 
     set_page_connection :forum, @forum
     set_title @forum.name, 'forum'
-    render_paragraph :text => output
+    render_paragraph :text => result.output
   end
 
   def topic
@@ -137,18 +118,16 @@ class Forum::PageRenderer < ParagraphRenderer
 
     if @topic
       posts_page = (params[:posts_page] || 1).to_i
-      display_string = "#{paragraph.id}_#{posts_page}"
-      output = @topic.cache_fetch(display_string) unless editor?
 
-      if ! output
+      result = renderer_cache(@topic, posts_page) do |cache|
 	@pages, @posts = @topic.forum_posts.approved_posts.paginate(posts_page, :per_page => @options.posts_per_page, :order => 'posted_at')
-	output = forum_page_topic_feature
-	@topic.cache_put(display_string, output) unless editor?
+	cache[:output] = forum_page_topic_feature
       end
 
       set_page_connection :topic, @topic
+      set_title @forum.name, 'forum'
       set_title @topic.subject[0..68], 'subject'
-      render_paragraph :text => output
+      render_paragraph :text => result.output
     else
       render_paragraph :text => ''
     end
@@ -232,25 +211,13 @@ class Forum::PageRenderer < ParagraphRenderer
     return render_paragraph :text => '[Configure Page Connections]' unless recent_options
 
     forum_page = (params[:forum_page] || 1).to_i
-    display_string = "#{paragraph.id}_#{forum_page}"
+    display_string = "#{forum_page}"
     if @content
       display_string << "_#{@content[0]}_#{@content[1]}"
     end
 
-    output = nil
-    category_title = nil
-    forum_title = nil
-    default_title = nil
-
-    if ! editor?
-      if @forum_url
-	default_title, forum_title, category_title, output = ForumForum.cache_fetch(display_string, @forum_url)
-      elsif @category_path
-	default_title, forum_title, category_title, output = ForumCategory.cache_fetch(display_string, @category_path)
-      end
-    end
-
-    if ! output
+    cache_obj = @forum_url ? [ForumForum, @forum_url] : [ForumCategory, @category_path]
+    result = renderer_cache(cache_obj, display_string) do |cache|
       if @forum_url
 	@forum = ForumForum.find_by_url @forum_url unless @forum
 	raise MissingPageException.new( site_node, language ) unless @forum
@@ -270,24 +237,16 @@ class Forum::PageRenderer < ParagraphRenderer
 	@pages, @topics = @category.forum_topics.order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
       end
 
-      category_title = @category.name
-      forum_title = @forum ? @forum.name : ''
-      default_title = @forum ? @forum.name : @category.name
-      output = forum_page_recent_feature
-
-      if ! editor?
-	if @forum
-	  @forum.cache_put(display_string, [default_title, forum_title, category_title, output], :url)
-	else
-	  @category.cache_put(display_string, [default_title, forum_title, category_title, output], :url)
-	end
-      end
+      cache[:category_title] = @category.name
+      cache[:forum_title] = @forum ? @forum.name : ''
+      cache[:default_title] = @forum ? @forum.name : @category.name
+      cache[:output] = forum_page_recent_feature
     end
 
-    set_title category_title, 'category'
-    set_title forum_title, 'forum' if ! forum_title.blank?
-    set_title default_title
-    render_paragraph :text => output
+    set_title result.category_title, 'category'
+    set_title result.forum_title, 'forum' if ! result.forum_title.blank?
+    set_title result.default_title
+    render_paragraph :text => result.output
   end
 
   protected

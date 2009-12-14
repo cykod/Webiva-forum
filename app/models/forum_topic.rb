@@ -91,4 +91,8 @@ class ForumTopic < DomainModel
       @body = nil
     end
   end
+
+  def subscribe?(end_user)
+    end_user.id ? true : false
+  end
 end

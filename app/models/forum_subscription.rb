@@ -4,6 +4,7 @@ class ForumSubscription < DomainModel
   belongs_to :forum_forum
 
   validates_presence_of :end_user_id, :forum_topic_id, :forum_forum_id
+  validates_uniqueness_of :end_user_id, :scope => :forum_topic_id
 
   named_scope( :user_subscriptions, Proc.new { |user|
     {

@@ -6,7 +6,7 @@ describe ForumSubscription do
 
   include ForumTestHelper
 
-  reset_domain_tables :forum_forums,:forum_posts,:forum_categories,:forum_topics,:end_users
+  reset_domain_tables :forum_forums,:forum_posts,:forum_categories,:forum_topics,:end_users,:forum_subscriptions
 
   it 'Initial test data validation' do
     @user = create_end_user
@@ -55,6 +55,9 @@ describe ForumSubscription do
     it "should create a valid subscription from topic.build_subscription" do
       @subscription = @topic.build_subscription @user
       @subscription.save.should be_true
+
+      @subscription = @topic.build_subscription @user
+      @subscription.save.should_not be_true
     end
   end
 end
