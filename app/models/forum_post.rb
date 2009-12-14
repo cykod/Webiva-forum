@@ -173,12 +173,23 @@ class ForumPost < DomainModel
     subscribers = self.forum_topic.forum_subscriptions.find(:all, :joins => ' inner join end_users on forum_subscriptions.end_user_id = end_users.id', :select => 'forum_subscriptions.*, end_users.email', :conditions => 'end_users.email is not null')
     return if subscribers.length == 0
 
+    url = Configuration.domain_link(data[:url])
+
+    variables = { :url => url,
+                  :link => "<a href='#{url}'>#{url}</a>",
+                  :subject => h(self.subject[0..45]),
+                  :topic => h(self.forum_topic.subject[0..45]),
+                  :forum => self.forum_forum.name,
+                  :category => self.forum_forum.forum_category.name,
+                  :body => self.body,
+                  :body_formatted => (self.body.gsub("\n","<br/>")),
+                  :message_formatted => (data[:message].gsub("\n","<br/>")),
+                  :message => data[:message]
+                }
+
     subscribers.each do |subscriber|
       email = subscriber.email
-
-      url = Configuration.domain_link(data[:url])
-      link = "<a href='#{url}'>#{url}</a>"
-      mail_template.deliver_to_address(email, { :url => url, :link => link, :subject => data[:subject], :message_formatted => (data[:message].gsub("\n","<br/>")), :message => data[:message] })
+      mail_template.deliver_to_address(email, variables)
     end
   end
 end
