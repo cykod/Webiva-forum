@@ -213,10 +213,13 @@ class Forum::PageRenderer < ParagraphRenderer
       if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id))
 	posts_page = ((@post.forum_topic.forum_posts.size-1) / @options.posts_per_page).to_i + 1
 	if posts_page > 1
-	  return redirect_paragraph @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s + '?posts_page=' + posts_page.to_s
+	  posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s + '?posts_page=' + posts_page.to_s
 	else
-	  return redirect_paragraph @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
+	  posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
 	end
+
+	@post.send_subscriptions!( {:url => posts_url, :subject => @post.subject, :message => @post.body}, nil )
+	return redirect_paragraph posts_url
       end
     end
 

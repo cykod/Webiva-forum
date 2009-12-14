@@ -81,6 +81,9 @@ class Forum::AdminController < ModuleController
   end
 
   class Options < HashModel
+    attributes :subscription_template_id => nil
+
+    integer_options :subscription_template_id
   end
   
   module AdminModule

@@ -62,4 +62,8 @@ class ForumForum < DomainModel
   def valid_file_size?(size)
     self.forum_category.valid_file_size?(size)
   end
+
+  def subscription_template
+    self.forum_category.subscription_template
+  end
 end

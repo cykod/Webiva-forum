@@ -104,7 +104,8 @@ class ForumPost < DomainModel
   end
 
   def attachment_id=(id)
-    @attachment_id = id.to_i
+    id = id.to_i
+    @attachment_id = id if id > 0
   end
 
   def content_id
@@ -159,6 +160,25 @@ class ForumPost < DomainModel
       unless self.valid_file_size?(file.file_size)
 	errors.add_to_base('Attachment is too large')
       end
+    end
+  end
+
+  def send_subscriptions!(data, default_subscription_template_id)
+    mail_template = self.forum_forum.subscription_template
+    if mail_template.nil?
+      mail_template = MailTemplate.find default_subscription_template_id if default_subscription_template_id
+    end
+    return if mail_template.nil?
+
+    subscribers = self.forum_topic.forum_subscriptions.find(:all, :joins => ' inner join end_users on forum_subscriptions.end_user_id = end_users.id', :select => 'forum_subscriptions.*, end_users.email')
+    return if subscribers.length == 0
+
+    subscribers.each do |subscriber|
+      email = subscriber.email
+
+      url = Configuration.domain_link(data[:url])
+      link = "<a href='#{url}'>#{url}</a>"
+      mail_template.deliver_to_address(email, { :url => url, :link => link, :subject => data[:subject], :message_formatted => (data[:message].gsub("\n","<br/>")), :message => data[:message] })
     end
   end
 end

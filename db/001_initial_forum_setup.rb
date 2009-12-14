@@ -14,6 +14,7 @@ class InitialForumSetup < ActiveRecord::Migration
       t.boolean :admin_permission,:default => false
       t.boolean :allow_anonymous_posting, :default => true
       t.boolean :post_permission,:default => false
+      t.integer :subscription_template_id
 
     end
 

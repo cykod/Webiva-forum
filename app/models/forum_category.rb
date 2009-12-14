@@ -10,6 +10,7 @@ class ForumCategory < DomainModel
   has_many :forum_topics, :through => :forum_forums
   has_many :forum_posts, :through => :forum_forums
   belongs_to :upload_folder, :foreign_key => 'folder_id', :class_name => 'DomainFile'
+  belongs_to :subscription_template, :class_name => 'MailTemplate'
 
   validates_presence_of :name
   validates_presence_of :content_filter
