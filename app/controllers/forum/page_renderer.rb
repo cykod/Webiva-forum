@@ -220,7 +220,7 @@ class Forum::PageRenderer < ParagraphRenderer
 	end
 
 	default_subscription_template_id = Forum::AdminController.module_options.subscription_template_id
-	@post.send_subscriptions!( {:url => posts_url, :subject => @post.subject, :message => @post.body}, default_subscription_template_id )
+	@post.send_subscriptions!( {:url => posts_url}, default_subscription_template_id )
 	return redirect_paragraph posts_url
       end
     end

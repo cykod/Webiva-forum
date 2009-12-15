@@ -177,19 +177,16 @@ class ForumPost < DomainModel
 
     variables = { :url => url,
                   :link => "<a href='#{url}'>#{url}</a>",
-                  :subject => h(self.subject[0..45]),
                   :topic => h(self.forum_topic.subject[0..45]),
+                  :post_count => self.forum_topic.forum_posts_count,
                   :forum => self.forum_forum.name,
                   :category => self.forum_forum.forum_category.name,
-                  :body => self.body,
-                  :body_formatted => (self.body.gsub("\n","<br/>")),
-                  :message_formatted => (data[:message].gsub("\n","<br/>")),
-                  :message => data[:message]
+                  :body => self.body[0..500],
+                  :body_formatted => (self.body[0..500].gsub("\n","<br/>"))
                 }
 
     subscribers.each do |subscriber|
-      email = subscriber.email
-      mail_template.deliver_to_address(email, variables)
+      mail_template.deliver_to_address(subscriber.email, variables)
     end
   end
 end
