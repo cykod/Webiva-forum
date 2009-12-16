@@ -4,7 +4,9 @@ class Forum::PageController < ParagraphController
 
   editor_header 'Forum Paragraphs'
 
-  editor_for :categories, :name => 'List of Forum Categories', :feature => :forum_page_categories
+  editor_for :categories, :name => 'List of Forum Categories', :feature => :forum_page_categories,
+                          :inputs => [[:url, 'Category Url', :path]]
+
   editor_for :list, :name => "List of Forums", :feature => :forum_page_list,
                     :inputs => [[:url, 'Category Url', :path]],
                     :outputs => [[:category, 'Forum Category Target', :forum_category_target]]
@@ -45,10 +47,11 @@ class Forum::PageController < ParagraphController
   end
 
   class ListOptions < HashModel
-    attributes :forum_category_id => nil, :forums_per_page => 10, :forum_page_id => nil
+    attributes :forum_category_id => nil, :forums_per_page => 10, :category_page_id => nil, :forum_page_id => nil
 
     integer_options :forum_category_id, :forums_per_page
 
+    page_options :category_page_id
     page_options :forum_page_id
   end
 
@@ -82,7 +85,7 @@ class Forum::PageController < ParagraphController
   end
 
   class RecentOptions < HashModel
-    attributes :forum_category_id => nil, :forum_forum_id => nil, :topics_per_page => 20, :category_page_id => nil, :forum_page_id => nil
+    attributes :forum_category_id => -1, :forum_forum_id => nil, :topics_per_page => 20, :category_page_id => nil, :forum_page_id => nil
 
     integer_options :forum_category_id, :forum_forum_id, :topics_per_page
 

@@ -123,14 +123,14 @@ describe Forum::PageRenderer, :type => :controller do
       renderer_get @rnd
     end
 
-    it "should not list topics for a forum url if a topic id is specified" do
+    it "should output an empty string for a forum url if a topic id is specified" do
       options = { :forum_forum_id => nil }
       inputs = { :forum => [:url, @forum.url], :topic => [:id, @topic.id] }
       @rnd = generate_page_renderer('forum', options, inputs)
-      @rnd.should_receive(:forum_page_forum_feature)
+      @rnd.should_not_receive(:forum_page_forum_feature)
 
       ForumForum.should_receive(:find_by_url).and_return(@forum)
-      ForumTopic.should_receive(:find_by_id).and_return(@topic)
+      ForumTopic.should_not_receive(:find_by_id).and_return(@topic)
       ForumTopic.should_not_receive(:paginate)
       renderer_get @rnd
     end
@@ -334,7 +334,7 @@ describe Forum::PageRenderer, :type => :controller do
       ForumTopic.should_receive(:paginate)
       renderer_get @rnd
 
-      options = {}
+      options = { :forum_category_id => nil }
       inputs = { :input => [:category_path, @cat.url] }
       @rnd = generate_page_renderer('recent', options, inputs)
       @rnd.should_render_feature('forum_page_recent')
@@ -362,7 +362,7 @@ describe Forum::PageRenderer, :type => :controller do
       ForumTopic.should_receive(:paginate)
       renderer_get @rnd
 
-      options = {}
+      options = { :forum_category_id => nil }
       inputs = { :input => [:category_path, @cat.url], :forum => [:url, @forum.url] }
       @rnd = generate_page_renderer('recent', options, inputs)
       @rnd.should_render_feature('forum_page_recent')

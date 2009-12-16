@@ -17,6 +17,10 @@ class Forum::PageRenderer < ParagraphRenderer
   def categories
     @options = paragraph_options(:categories)
 
+    conn_type, conn_id = page_connection
+    @category = ForumCategory.find_by_url conn_id if conn_type == :url && ! conn_id.blank?
+    return render_paragraph :text => '' if @category
+
     result = renderer_cache(ForumCategory) do |cache|
       @categories = ForumCategory.find(:all, :order => 'name' )
       cache[:output] = forum_page_categories_feature
@@ -33,11 +37,11 @@ class Forum::PageRenderer < ParagraphRenderer
     elsif @options.forum_category_id.blank?
       conn_type, conn_id = page_connection
       @category = ForumCategory.find_by_url conn_id if conn_type == :url && ! conn_id.blank?
-      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @category
     else
       @category = ForumCategory.find @options.forum_category_id
-      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @category
     end
+
+    return render_paragraph :text => '' unless @category
 
     forum_page = (params[:forum_page] || 1).to_i
 
@@ -75,7 +79,9 @@ class Forum::PageRenderer < ParagraphRenderer
 
     forum_page = (params[:forum_page] || 1).to_i
     conn_type, conn_id = page_connection(:topic)
-    must_fetch_topic = (conn_type == :id && ! conn_id.blank?)
+    must_fetch_topic = (conn_type == :id && ! conn_id.blank? && ! editor?)
+
+    return render_paragraph :text => '' if must_fetch_topic
 
     cache_obj = must_fetch_topic ? [ForumTopic, conn_id.to_i] : @forum
 
@@ -99,11 +105,12 @@ class Forum::PageRenderer < ParagraphRenderer
 
     if editor?
       if @options.forum_forum_id.blank?
-	@forum = ForumForum.find(:first)
+	@topic = ForumTopic.find(:first)
+	@forum = @topic.forum_forum
       else
 	@forum = ForumForum.find_by_id @options.forum_forum_id
+	@topic = @forum.forum_topics.find(:first) if @forum;
       end
-      @topic = @forum.forum_topics.find(:first) if @forum;
     else
       if @options.forum_forum_id.blank?
 	conn_type, conn_id = page_connection(:forum)
@@ -241,7 +248,16 @@ class Forum::PageRenderer < ParagraphRenderer
       display_string << "_#{@content[0]}_#{@content[1]}"
     end
 
-    cache_obj = @forum_url ? [ForumForum, @forum_url] : [ForumCategory, @category_path]
+    cache_obj = nil
+    if @forum_url
+      cache_obj = [ForumForum, @forum_url]
+    elsif @category_path
+      cache_obj = [ForumCategory, @category_path]
+    else
+      cache_obj = ForumTopic
+      display_string << '_recent'
+    end
+
     result = renderer_cache(cache_obj, display_string) do |cache|
       if @forum_url
 	@forum = ForumForum.find_by_url @forum_url unless @forum
@@ -260,17 +276,13 @@ class Forum::PageRenderer < ParagraphRenderer
 	raise MissingPageException.new( site_node, language ) unless @category
 
 	@pages, @topics = @category.forum_topics.order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
+      else
+	@pages, @topics = ForumTopic.order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
       end
 
-      cache[:category_title] = @category.name
-      cache[:forum_title] = @forum ? @forum.name : ''
-      cache[:default_title] = @forum ? @forum.name : @category.name
       cache[:output] = forum_page_recent_feature
     end
 
-    set_title result.category_title, 'category'
-    set_title result.forum_title, 'forum' if ! result.forum_title.blank?
-    set_title result.default_title
     render_paragraph :text => result.output
   end
 
@@ -280,21 +292,23 @@ class Forum::PageRenderer < ParagraphRenderer
     @options = paragraph_options(:recent)
 
     if editor?
-      if ! @options.forum_category_id.blank?
-	@category = ForumCategory.find_by_id @options.forum_category_id
-      elsif ! @options.forum_forum_id.blank?
+      if ! @options.forum_forum_id.blank?
 	@forum = ForumForum.find_by_id @options.forum_forum_id
 	@category = @forum.forum_category
+      elsif ! @options.forum_category_id.blank?
+	return true if @options.forum_category_id == -1
+	@category = ForumCategory.find_by_id @options.forum_category_id
       else
 	@category = ForumCategory.find(:first)
       end
-    elsif ! @options.forum_category_id.blank?
-      @category = ForumCategory.find @options.forum_category_id
-      conn_type, conn_id = page_connection(:forum)
-      @forum_url = conn_id if ! conn_id.blank? && conn_type == :url
     elsif ! @options.forum_forum_id.blank?
       @forum = ForumForum.find @options.forum_forum_id
       @category = @forum.forum_category
+    elsif ! @options.forum_category_id.blank?
+      return true if @options.forum_category_id == -1
+      @category = ForumCategory.find @options.forum_category_id
+      conn_type, conn_id = page_connection(:forum)
+      @forum_url = conn_id if ! conn_id.blank? && conn_type == :url
     else
       conn_type, conn_id = page_connection
 
