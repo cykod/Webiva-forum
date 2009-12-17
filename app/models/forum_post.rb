@@ -170,7 +170,7 @@ class ForumPost < DomainModel
     end
     return if mail_template.nil?
 
-    subscribers = self.forum_topic.forum_subscriptions.find(:all, :joins => ' inner join end_users on forum_subscriptions.end_user_id = end_users.id', :select => 'forum_subscriptions.*, end_users.email', :conditions => 'end_users.email is not null')
+    subscribers = self.forum_topic.forum_subscriptions.find(:all, :joins => :end_user, :select => 'forum_subscriptions.*, end_users.email', :conditions => 'end_users.email is not null')
     return if subscribers.length == 0
 
     url = Configuration.domain_link(data[:url])
