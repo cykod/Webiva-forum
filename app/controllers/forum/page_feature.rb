@@ -319,7 +319,7 @@ class Forum::PageFeature < ParagraphFeature
   end
 
   def add_topic_features(context, data, base='topic')
-    context.h_tag(base + ':subject') { |t| truncate(t.locals.topic.subject, :length => (t.attr[:length] || 100).to_i) }
+    context.h_tag(base + ':subject') { |t| truncate(t.locals.topic.subject, :length => (t.attr['length'] || 100).to_i) }
     context.h_tag(base + ':posted_by') { |t| t.locals.topic.posted_by }
     context.link_tag(base + ':topic') { |t| "#{data[:options].forum_page_url}/#{t.locals.topic.forum_forum.url}/#{t.locals.topic.id}" }
     context.value_tag(base + ':posts_count') { |t| number_with_delimiter(t.locals.topic.forum_posts_count) }
