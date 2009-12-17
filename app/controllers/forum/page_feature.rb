@@ -202,14 +202,19 @@ class Forum::PageFeature < ParagraphFeature
       </cms:forum>
       <h1><cms:topic_link><cms:subject/></cms:topic_link></h1>
       <hr/>
-      <cms:new_post>
-        <cms:errors><div class='errors'><cms:value/></div></cms:errors>
-        Body:<br/><cms:body/><br/>
-        <cms:attachment>
-          Attachment:<br/><cms:file/><br/>
-        </cms:attachment>
-        <cms:submit/>
-      </cms:new_post>
+      <cms:post_form>
+        <cms:new_post>
+          <cms:errors><div class='errors'><cms:value/></div></cms:errors>
+          Body:<br/><cms:body/><br/>
+          <cms:attachment>
+            Attachment:<br/><cms:file/><br/>
+          </cms:attachment>
+          <cms:submit/>
+        </cms:new_post>
+      </cms:post_form>
+      <cms:no_post_form>
+        <div class='errors'>Must be logged in to reply.</div>
+      </cms:no_post_form>
     </cms:topic>
     <cms:no_topic>
       <cms:category>
@@ -223,15 +228,20 @@ class Forum::PageFeature < ParagraphFeature
         <cms:description><p><cms:value/></p></cms:description>
         <hr/>
       </cms:forum>
-      <cms:new_post>
-        <cms:errors><div class='errors'><cms:value/></div></cms:errors>
-        Subject:<br/><cms:subject/><br/>
-        Body:<br/><cms:body/><br/>
-        <cms:attachment>
-          Attachment:<br/><cms:file/><br/>
-        </cms:attachment>
-        <cms:submit/>
-      </cms:new_post>
+      <cms:post_form>
+        <cms:new_post>
+          <cms:errors><div class='errors'><cms:value/></div></cms:errors>
+          Subject:<br/><cms:subject/><br/>
+          Body:<br/><cms:body/><br/>
+          <cms:attachment>
+            Attachment:<br/><cms:file/><br/>
+          </cms:attachment>
+          <cms:submit/>
+        </cms:new_post>
+      </cms:post_form>
+      <cms:no_post_form>
+        <div class='errors'>Must be logged in to create a new topic.</div>
+      </cms:no_post_form>
     </cms:no_topic>
   FEATURE
   
@@ -246,13 +256,15 @@ class Forum::PageFeature < ParagraphFeature
       c.expansion_tag('topic') { |t| data[:topic] ? t.locals.topic = data[:topic] : nil }
         add_topic_features(c, data)
 
-      c.form_for_tag('new_post','post', :html => {:multipart => true}) { |t| t.locals.post = data[:post] }
-        c.form_error_tag('new_post:errors')
-        c.field_tag('new_post:subject')
-        c.field_tag('new_post:body', :control => 'text_area', :rows => 6, :cols => 50)
-        c.expansion_tag('new_post:attachment') { |t| t.locals.post.can_add_attachments? }
-          c.field_tag('new_post:attachment:file', :field => 'attachment_id', :control => 'upload_document')
-        c.submit_tag('new_post:submit', :default => 'Submit')
+      c.expansion_tag('post_form') { |t| data[:post] ? t.locals.post = data[:post] : nil }
+
+      c.form_for_tag('post_form:new_post','post', :html => {:multipart => true}) { |t| t.locals.post = data[:post] }
+        c.form_error_tag('post_form:new_post:errors')
+        c.field_tag('post_form:new_post:subject')
+        c.field_tag('post_form:new_post:body', :control => 'text_area', :rows => 6, :cols => 50)
+        c.expansion_tag('post_form:new_post:attachment') { |t| t.locals.post.can_add_attachments? }
+          c.field_tag('post_form:new_post:attachment:file', :field => 'attachment_id', :control => 'upload_document')
+        c.submit_tag('post_form:new_post:submit', :default => 'Submit')
 
     end
   end

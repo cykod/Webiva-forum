@@ -201,10 +201,15 @@ class Forum::PageRenderer < ParagraphRenderer
 
     if @topic
       if ! @forum.allowed_to_create_post?(myself)
-	return render_paragraph :text => ''
+	set_title @topic.subject[0..68], 'subject'
+	set_title @forum.name, 'forum'
+	set_title @topic.subject[0..68]
+	return render_paragraph :feature => :forum_page_new_post
       end
     elsif ! @forum.allowed_to_create_topic?(myself)
-      return render_paragraph :text => ''
+      set_title @forum.name, 'forum'
+      set_title @forum.name
+      return render_paragraph :feature => :forum_page_new_post
     end
 
     @post = @topic ? @topic.build_post : @forum.forum_posts.build
