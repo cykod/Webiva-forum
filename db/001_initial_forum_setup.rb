@@ -44,6 +44,7 @@ class InitialForumSetup < ActiveRecord::Migration
       t.integer :last_post_id
       t.datetime :last_posted_at
       t.integer :activity_count, :default => 0
+      t.integer :views_count, :default => 0
       t.string :content_type
       t.integer :content_id
 

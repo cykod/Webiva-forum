@@ -99,4 +99,18 @@ class ForumTopic < DomainModel
       false
     end
   end
+
+  def increment_views
+    self.connection.update( "update forum_topics set views_count = views_count + 1 where id = #{self.id}" )
+    self.views = self.views_count + 1
+  end
+
+  def views
+    return @views if @views
+    @views = self.views_count
+  end
+
+  def views=(views)
+    @views = views
+  end
 end

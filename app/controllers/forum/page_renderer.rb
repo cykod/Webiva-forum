@@ -124,6 +124,8 @@ class Forum::PageRenderer < ParagraphRenderer
     end
 
     if @topic
+      increment_topic_views @topic
+
       posts_page = (params[:posts_page] || 1).to_i
       display_string = "#{posts_page}"
 
@@ -334,5 +336,12 @@ class Forum::PageRenderer < ParagraphRenderer
     @forum_url = @forum.url if @forum
 
     true
+  end
+
+  def increment_topic_views(topic)
+    session[:forum_topics] ||= {}
+    return if session[:forum_topics].has_key?(topic.id)
+    topic.increment_views
+    session[:forum_topics][topic.id] = true
   end
 end
