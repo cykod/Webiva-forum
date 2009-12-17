@@ -329,6 +329,12 @@ class Forum::PageFeature < ParagraphFeature
 
     context.expansion_tag(base + ':user') { |t| t.locals.user = t.locals.topic.end_user }
       context.define_user_details_tags(base + ':user')
+
+    context.expansion_tag(base + ':first_post') { |t| t.locals.post = t.locals.topic.first_post }
+      add_post_features(context, data, base + ':first_post')
+
+    context.expansion_tag(base + ':last_post') { |t| t.locals.post = t.locals.topic.last_post }
+      add_post_features(context, data, base + ':last_post')
   end
 
   def add_post_features(context, data, base='post')
