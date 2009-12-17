@@ -315,6 +315,8 @@ class Forum::PageFeature < ParagraphFeature
     context.value_tag(base + ':activity_count') { |t| number_with_delimiter(t.locals.topic.activity_count) }
     context.value_tag(base + ':posts_count_posts') { |t| pluralize(t.locals.topic.forum_posts_count, 'post') }
     context.value_tag(base + ':activity_count_posts') { |t| pluralize(t.locals.topic.activity_count, 'post') }
+    context.value_tag(base + ':views') { |t| number_with_delimiter(t.locals.topic.views) }
+    context.value_tag(base + ':views_views') { |t| pluralize(t.locals.topic.views, 'view') }
     context.date_tag(base + ':updated_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.topic.updated_at }
     context.value_tag(base + ':updated_ago') { |t| time_ago_in_words(t.locals.topic.updated_at) }
     context.date_tag(base + ':created_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.topic.created_at }
