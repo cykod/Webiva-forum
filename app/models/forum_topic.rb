@@ -5,6 +5,8 @@ class ForumTopic < DomainModel
   has_many :forum_posts, :dependent => :destroy
   has_many :forum_subscriptions, :dependent => :destroy
 
+  content_node :container_type => 'ForumForum', :container_field => 'forum_forum_id'
+
   validates_presence_of :subject, :forum_forum_id, :posted_by
 
   validates_numericality_of :sticky, :only_integer => true
