@@ -61,5 +61,13 @@ describe ForumTopic do
       @topic.save.should be_true
       @forum.forum_topics.sticky_topics.count.should == 1
     end
+
+    it "should be able to connect to a sperate piece of content" do
+      @topic = @forum.forum_topics.build :subject => 'test subject', :end_user => @user, :sticky => 1, :content => @user
+      @topic.save.should be_true
+      @forum.forum_topics.sticky_topics.count.should == 1
+      @topic.content_type.should == 'EndUser'
+      @topic.content_id.should == @user.id
+    end
   end
 end

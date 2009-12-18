@@ -1,4 +1,5 @@
 class ForumTopic < DomainModel
+  belongs_to :content, :polymorphic => true
   belongs_to :forum_forum, :counter_cache => true
   belongs_to :end_user
 
