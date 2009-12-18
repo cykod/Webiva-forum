@@ -129,15 +129,12 @@ class Forum::PageRenderer < ParagraphRenderer
       posts_page = (params[:posts_page] || 1).to_i
       display_string = "#{posts_page}"
 
-      skip = false
       default_subscription_template_id = Forum::AdminController.module_options.subscription_template_id
       if @topic.subscribe?(myself, default_subscription_template_id)
-	display_string << "_#{myself.id}"
 	@subscription = ForumSubscription.find_by_end_user_id_and_forum_topic_id(myself.id, @topic.id)
 	@subscription = @topic.build_subscription(myself) if @subscription.nil?
-	display_string << "_#{@subscription.id ? 'u' : 's'}"
+	display_string << "_#{@subscription.id ? 'unsubscribed' : 'subscribed'}"
 	if request.post?
-	  skip = true
 	  if params[:subscribe] && params[:subscribe].blank?
 	    @subscription.destroy if @subscription.subscribed?
 	    @subscription = @topic.build_subscription(myself)
@@ -149,7 +146,7 @@ class Forum::PageRenderer < ParagraphRenderer
 	end
       end
 
-      result = renderer_cache(@topic, display_string, :skip => skip) do |cache|
+      result = renderer_cache(@topic, display_string, :skip => request.post?) do |cache|
 	@pages, @posts = @topic.forum_posts.approved_posts.paginate(posts_page, :per_page => @options.posts_per_page, :order => 'posted_at')
 	cache[:output] = forum_page_topic_feature
       end
@@ -199,51 +196,57 @@ class Forum::PageRenderer < ParagraphRenderer
       end
     end
 
+    cache_obj = @topic ? @topic : @forum
+
+    allowed_to_post = true
     if @topic
       if ! @forum.allowed_to_create_post?(myself)
-	set_title @topic.subject[0..68], 'subject'
-	set_title @forum.name, 'forum'
-	set_title @topic.subject[0..68]
-	return render_paragraph :feature => :forum_page_new_post
+	allowed_to_post = false
       end
     elsif ! @forum.allowed_to_create_topic?(myself)
-      set_title @forum.name, 'forum'
-      set_title @forum.name
-      return render_paragraph :feature => :forum_page_new_post
+      allowed_to_post = false
     end
 
-    @post = @topic ? @topic.build_post : @forum.forum_posts.build
-    @post.end_user = myself
+    display_string = allowed_to_post ? 'allowed' : 'not_allowed'
 
-    if @content
-      @post.content_type = @content[0]
-      @post.content_id = @content[1]
-    end
+    result = renderer_cache(cache_obj, display_string, :skip => request.post?) do |cache|
 
-    if request.post? && params[:post]
-      if @post.can_add_attachments?
-	handle_file_upload params[:post], 'attachment_id', {:folder => @post.upload_folder_id}
-      end
+      if allowed_to_post
+	@post = @topic ? @topic.build_post : @forum.forum_posts.build
+	@post.end_user = myself
 
-      if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id))
-	posts_page = ((@post.forum_topic.forum_posts.size-1) / @options.posts_per_page).to_i + 1
-	if posts_page > 1
-	  posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s + '?posts_page=' + posts_page.to_s
-	else
-	  posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
+	if @content
+	  @post.content_type = @content[0]
+	  @post.content_id = @content[1]
 	end
 
-	default_subscription_template_id = Forum::AdminController.module_options.subscription_template_id
-	@post.send_subscriptions!( {:url => posts_url}, default_subscription_template_id )
-	return redirect_paragraph posts_url
+	if request.post? && params[:post]
+	  if @post.can_add_attachments?
+	    handle_file_upload params[:post], 'attachment_id', {:folder => @post.upload_folder_id}
+	  end
+
+	  if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id))
+	    posts_page = ((@post.forum_topic.forum_posts.size-1) / @options.posts_per_page).to_i + 1
+	    if posts_page > 1
+	      posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s + '?posts_page=' + posts_page.to_s
+	    else
+	      posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
+	    end
+
+	    default_subscription_template_id = Forum::AdminController.module_options.subscription_template_id
+	    @post.send_subscriptions!( {:url => posts_url}, default_subscription_template_id )
+	    return redirect_paragraph posts_url
+	  end
+	end
       end
+
+      cache[:output] = forum_page_new_post_feature
     end
 
     set_title @topic.subject[0..68], 'subject' if @topic
     set_title @forum.name, 'forum'
     set_title @topic ? @topic.subject[0..68] : @forum.name
-
-    render_paragraph :feature => :forum_page_new_post
+    render_paragraph :text => result.output
   end
 
   def recent
