@@ -68,6 +68,9 @@ class Forum::PageRenderer < ParagraphRenderer
       else
 	@forum = ForumForum.find_by_id @options.forum_forum_id
       end
+
+      return render_paragraph :text => 'No forum found.' if @forum.nil?
+
     elsif ! @options.forum_forum_id.blank?
       @forum = ForumForum.find @options.forum_forum_id
       raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
@@ -106,11 +109,13 @@ class Forum::PageRenderer < ParagraphRenderer
     if editor?
       if @options.forum_forum_id.blank?
 	@topic = ForumTopic.find(:first)
-	@forum = @topic.forum_forum
+	@forum = @topic.forum_forum if @topic
       else
 	@forum = ForumForum.find_by_id @options.forum_forum_id
 	@topic = @forum.forum_topics.find(:first) if @forum;
       end
+
+      return render_paragraph :text => 'No forum found.' if @forum.nil?
     else
       if @options.forum_forum_id.blank?
 	conn_type, conn_id = page_connection(:forum)
@@ -169,6 +174,8 @@ class Forum::PageRenderer < ParagraphRenderer
       else
 	@forum = ForumForum.find_by_id @options.forum_forum_id
       end
+
+      return render_paragraph :text => 'No forum found.' if @forum.nil?
     else
       if @options.forum_forum_id.blank?
 	conn_type, conn_id = page_connection
@@ -311,6 +318,8 @@ class Forum::PageRenderer < ParagraphRenderer
       else
 	@category = ForumCategory.find(:first)
       end
+
+      return false if @category.nil?
     elsif ! @options.forum_forum_id.blank?
       @forum = ForumForum.find @options.forum_forum_id
       @category = @forum.forum_category
