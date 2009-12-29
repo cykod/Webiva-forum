@@ -4,7 +4,7 @@ class ForumForum < DomainModel
 
   cached_content :identifier => :url, :update => [ :forum_category ]
 
-  content_node_type :forum_forum, "ForumTopic", :content_name => :name, :title_field => :subject
+  content_node_type :forum, "ForumTopic", :content_name => :name, :title_field => :subject
 
   belongs_to :forum_category
   has_many :forum_topics, :dependent => :destroy
@@ -47,6 +47,15 @@ class ForumForum < DomainModel
       false
     end
   end
+  
+  def content_admin_url(forum_topic_id)
+    {  :controller => '/forum/posts', :action => 'list', :path => [ self.forum_category_id,self.id, forum_topic_id ] }
+  end
+
+  def content_type_name
+    "Forum"
+  end
+
 
   def allowed_to_create_topic?(end_user)
     self.allowed_to_create_post?(end_user)

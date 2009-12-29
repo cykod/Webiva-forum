@@ -32,6 +32,11 @@ class Forum::TopicsController < ModuleController
   end
 
   def topic_table(display=true)
+
+    active_table_action('topic') do |act,tids|
+      ForumTopic.find(tids,:conditions => { :forum_forum_id => @forum.id }).map(&:destroy) if act == 'delete'
+    end
+
     @active_table_output = topic_table_generate params, :order => 'forum_topics.updated_at DESC', :conditions => ['forum_topics.forum_forum_id = ?',@forum.id ]
 
     render :partial => 'topic_table' if display

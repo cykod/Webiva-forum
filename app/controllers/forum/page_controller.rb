@@ -73,6 +73,8 @@ class Forum::PageController < ParagraphController
     page_options :category_page_id
     page_options :forum_page_id
     page_options :new_post_page_id
+
+    meta_canonical_paragraph "ForumForum", :list_page_id => :forum_page_id, :url_field => :url 
   end
 
   class NewPostOptions < HashModel

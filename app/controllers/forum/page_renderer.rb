@@ -22,7 +22,7 @@ class Forum::PageRenderer < ParagraphRenderer
     return render_paragraph :text => '' if @category
 
     result = renderer_cache(ForumCategory) do |cache|
-      @categories = ForumCategory.find(:all, :order => 'name' )
+      @categories = ForumCategory.find(:all, :order => 'weight, name' )
       cache[:output] = forum_page_categories_feature
     end
 
@@ -46,7 +46,7 @@ class Forum::PageRenderer < ParagraphRenderer
     forum_page = (params[:forum_page] || 1).to_i
 
     result = renderer_cache(@category, forum_page) do |cache|
-      @pages, @forums = @category.forum_forums.paginate(forum_page, :per_page => @options.forums_per_page, :order => 'weight DESC, name' )
+      @pages, @forums = @category.forum_forums.paginate(forum_page, :per_page => @options.forums_per_page, :order => 'weight, name' )
       cache[:output] = forum_page_list_feature
     end
 
@@ -156,6 +156,7 @@ class Forum::PageRenderer < ParagraphRenderer
 	cache[:output] = forum_page_topic_feature
       end
 
+      set_content_node(@topic)
       set_page_connection :topic, @topic
       set_title @forum.name, 'forum'
       set_title @topic.subject[0..68], 'subject'
@@ -196,7 +197,7 @@ class Forum::PageRenderer < ParagraphRenderer
       else
 	@forum = ForumForum.find @options.forum_forum_id
 
-	conn_type, conn_id = page_connection
+	conn_type, conn_id = page_connection(:content)
 	if conn_type == :content
 	  @content = conn_id
 	end
@@ -330,7 +331,6 @@ class Forum::PageRenderer < ParagraphRenderer
       @forum_url = conn_id if ! conn_id.blank? && conn_type == :url
     else
       conn_type, conn_id = page_connection
-
       if conn_type == :category
 	@category = conn_id
       elsif conn_type == :forum
