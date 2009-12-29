@@ -391,7 +391,7 @@ describe Forum::PageRenderer, :type => :controller do
       @content = ['content_test', 1]
       @topic_page_node = SiteNode.create(:node_type => 'P', :title => 'topic')
       options = {:forum_page_id => @topic_page_node.id, :forum_forum_id => @forum.id}
-      inputs = { :input => [:content, @content] } 
+      inputs = { :content => [:content, @content] } 
       @rnd = generate_page_renderer('new_post', options, inputs)
 
       renderer_post @rnd, { :post => {:body => 'My Test Post', :subject => 'My Test Subject'} }
