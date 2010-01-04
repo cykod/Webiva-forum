@@ -15,11 +15,6 @@ class ForumForum < DomainModel
 
   named_scope :main_forums, :conditions => 'forum_forums.main_page = 1'
 
-  def content_admin_url(forum_topic_id)
-    {  :controller => '/forum/posts', :action => 'list', :path => [ self.forum_category.id, self.id, forum_topic_id ],
-       :title => 'Forum Topic Posts'.t}
-  end
-
   def before_validation
     self.url = generate_url(:url,self.name) if self.url.blank?
   end

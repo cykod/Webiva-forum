@@ -116,4 +116,9 @@ class ForumTopic < DomainModel
   def views=(views)
     @views = views
   end
+
+  def content_node_body(language)
+    @posts = self.forum_posts.approved_posts.find(:all, :select => 'id, subject, body', :order => 'posted_at')
+    @posts ? @posts.map(&:body).join("\n") : ''
+  end
 end
