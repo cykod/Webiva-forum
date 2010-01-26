@@ -17,6 +17,7 @@ class ForumPost < DomainModel
 
   named_scope :approved_posts, :conditions => 'forum_posts.approved = 1'
 
+
   def moderated(end_user)
     self.moderated_at = Time.now
     self.moderated_by = end_user
@@ -54,9 +55,10 @@ class ForumPost < DomainModel
 
   def before_create
     if self.forum_topic.nil?
-      self.create_forum_topic :subject => self.subject, :posted_by => self.posted_by,
+      topic = self.build_forum_topic :subject => self.subject, :posted_by => self.posted_by,
 	                      :end_user_id => self.end_user_id, :forum_forum_id => self.forum_forum_id,
 	                      :content_type => self.content_type, :content_id => self.content_id
+      topic.save_content(self.end_user)
     end
 
     self.first_post = self.forum_topic.forum_posts.count == 0
@@ -74,7 +76,7 @@ class ForumPost < DomainModel
   def after_update
     if self.changed.include?('approved')
       self.forum_topic.refresh_posts_count
-      self.forum_topic.save
+      self.forum_topic.save_content(self.end_user)
     end
   end
 

@@ -312,7 +312,7 @@ class Forum::PageRenderer < ParagraphRenderer
     if editor?
       if ! @options.forum_forum_id.blank?
 	@forum = ForumForum.find_by_id @options.forum_forum_id
-	@category = @forum.forum_category
+	@category = @forum.forum_category if @forum
       elsif ! @options.forum_category_id.blank?
 	return true if @options.forum_category_id == -1
 	@category = ForumCategory.find_by_id @options.forum_category_id

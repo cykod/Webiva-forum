@@ -313,7 +313,7 @@ class Forum::PageFeature < ParagraphFeature
     context.value_tag(base + ':topics_count_topics') { |t| pluralize(t.locals.forum.forum_topics_count, 'topic') }
     context.expansion_tag(base + ':on_main_page') { |t| t.locals.forum.main_page }
 
-    if data[:options].new_post_page_id && ! data[:options].new_post_page_id.blank?
+    if data[:options] && data[:options].new_post_page_id && ! data[:options].new_post_page_id.blank?
       context.link_tag(base + ':new_topic') { |t| "#{data[:options].new_post_page_url}/#{t.locals.forum.url}" }
     end
   end
@@ -335,7 +335,7 @@ class Forum::PageFeature < ParagraphFeature
     context.value_tag(base + ':created_ago') { |t| time_ago_in_words(t.locals.topic.created_at) }
     context.expansion_tag(base + ':sticky') { |t| t.locals.topic.sticky > 0 }
 
-    if data[:options].new_post_page_id && ! data[:options].new_post_page_id.blank?
+    if data[:options] && data[:options].new_post_page_id && ! data[:options].new_post_page_id.blank?
       context.link_tag(base + ':new_post') { |t| "#{data[:options].new_post_page_url}/#{t.locals.forum.url}/#{t.locals.topic.id}" }
     end
 
