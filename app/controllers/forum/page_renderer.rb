@@ -234,6 +234,13 @@ class Forum::PageRenderer < ParagraphRenderer
 	  end
 
 	  if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id))
+
+	    action = @topic ? 'new_post' : 'new_topic'
+	    action_path = "/forum/#{action}"
+	    atr = @topic ? @post : @post.forum_topic
+	    paragraph_action(myself.action(action_path, :target => @post, :identifier => @post.subject))
+	    paragraph.run_triggered_actions(atr,action,myself)
+
 	    posts_page = ((@post.forum_topic.forum_posts.size-1) / @options.posts_per_page).to_i + 1
 	    if posts_page > 1
 	      posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s + '?posts_page=' + posts_page.to_s

@@ -2,7 +2,7 @@
 class ForumPostAttachment < DomainModel
   belongs_to :end_user
   belongs_to :forum_post
-  belongs_to :domain_file
+  has_domain_file :domain_file_id
 
   validates_presence_of :end_user_id, :forum_post_id, :domain_file_id
 

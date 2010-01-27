@@ -26,6 +26,9 @@ class Forum::AdminController < ModuleController
                   'Modules' =>  { :controller => '/modules' },
                   'Forum Options' => { :action => 'options' }
 
+  register_action '/forum/new_post', :description => 'Forum New Post', :level => 3
+  register_action '/forum/new_topic', :description => 'Forum New Topic', :level => 3
+
   public     
 
   def self.get_forums_info

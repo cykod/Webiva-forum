@@ -27,7 +27,8 @@ class Forum::PageController < ParagraphController
                                                 [:forum_path, 'Forum Url', :path]],
                                      :topic => [[:id, 'Topic Id', :path]],
                                      :content => [[:content, 'Content Identifier', :content]]
-                                   }
+                                   },
+                        :triggers => [['New Post','new_post'], ['New Topic','new_topic']]
 
   editor_for :recent, :name => "Recent Posts Display", :feature => :forum_page_recent,
                       :inputs => { :input => [[:category, 'Category', :forum_category_target],
