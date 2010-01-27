@@ -59,6 +59,7 @@ class ForumPost < DomainModel
 	                      :end_user_id => self.end_user_id, :forum_forum_id => self.forum_forum_id,
 	                      :content_type => self.content_type, :content_id => self.content_id
       topic.save_content(self.end_user)
+      self.forum_topic_id = topic.id
     end
 
     self.first_post = self.forum_topic.forum_posts.count == 0

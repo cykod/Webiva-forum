@@ -14,7 +14,7 @@ describe ForumCategory do
     @cat.valid?
 
     @cat.should have(1).errors_on(:name)
-    @cat.should have(2).errors_on(:content_filter)
+    @cat.should have(1).errors_on(:content_filter)
   end
 
   it "should be able to create a new forum and generate a url" do
@@ -29,9 +29,5 @@ describe ForumCategory do
       @cat = ForumCategory.new :name => 'Test Category', :content_filter => ele[1]
       @cat.save.should be_true
     end
-
-    @cat = ForumCategory.new :name => 'Test Category', :content_filter => 'invalid_filter'
-    @cat.save
-    @cat.should have(1).errors_on(:content_filter)
   end
 end
