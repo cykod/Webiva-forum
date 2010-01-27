@@ -253,7 +253,7 @@ describe Forum::PageRenderer, :type => :controller do
     it "should be able to create a new topic" do
       mock_user
 
-      @topic_page_node = SiteNode.create(:node_type => 'P', :title => 'topic')
+      @topic_page_node = SiteVersion.default.root.add_subpage('topic')
       options = {:forum_page_id => @topic_page_node.id}
       inputs = { :input => [:forum, @forum] } 
       @rnd = generate_page_renderer('new_post', options, inputs)
@@ -272,7 +272,7 @@ describe Forum::PageRenderer, :type => :controller do
     it "should be able to create a new post" do
       mock_user
 
-      @topic_page_node = SiteNode.create(:node_type => 'P', :title => 'topic')
+      @topic_page_node = SiteVersion.default.root.add_subpage('topic')
       options = {:forum_page_id => @topic_page_node.id}
       inputs = { :input => [:topic, @topic] } 
       @rnd = generate_page_renderer('new_post', options, inputs)
@@ -389,7 +389,7 @@ describe Forum::PageRenderer, :type => :controller do
       mock_user
 
       @content = ['content_test', 1]
-      @topic_page_node = SiteNode.create(:node_type => 'P', :title => 'topic')
+      @topic_page_node = SiteVersion.default.root.add_subpage('topic')
       options = {:forum_page_id => @topic_page_node.id, :forum_forum_id => @forum.id}
       inputs = { :content => [:content, @content] } 
       @rnd = generate_page_renderer('new_post', options, inputs)

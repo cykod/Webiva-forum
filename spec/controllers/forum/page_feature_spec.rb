@@ -40,9 +40,9 @@ describe Forum::PageFeature, :type => :view do
       @topic.reload
       @feature = build_feature('/forum/page_feature')
 
-      @category_page_node = SiteNode.create(:node_type => 'P', :title => 'category')
-      @forum_page_node = SiteNode.create(:node_type => 'P', :title => 'forum')
-      @new_post_page_node = SiteNode.create(:node_type => 'P', :title => 'new_post')
+      @category_page_node = SiteVersion.default.root.add_subpage('category')
+      @forum_page_node = SiteVersion.default.root.add_subpage('forum')
+      @new_post_page_node = SiteVersion.default.root.add_subpage('new_post')
     end
 
     it "should display list of categories" do
