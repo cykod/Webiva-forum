@@ -36,7 +36,7 @@ class Forum::AdminController < ModuleController
       {:name => "%s Forums" / category.name,
 	:url => { :controller => '/forum/manage', :action=>'category', :path => category.id } ,
 	:permission => { :model => category, :permission => :admin_permission, :base => :forum_manage },
-	:icon => 'icons/content/blog.gif' }
+	:icon => 'icons/content/forms_icon.png' }
     end
   end
   
