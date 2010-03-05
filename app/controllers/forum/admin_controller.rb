@@ -29,6 +29,8 @@ class Forum::AdminController < ModuleController
   register_action '/forum/new_post', :description => 'Forum New Post', :level => 3
   register_action '/forum/new_topic', :description => 'Forum New Topic', :level => 3
 
+  register_handler :structure, :wizard, "Forum::WizardController"
+
   public     
 
   def self.get_forums_info
