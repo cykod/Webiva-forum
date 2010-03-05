@@ -11,6 +11,7 @@
 <%= f.access_control :post_permission, 'Who is allowed to post to these forums', :vertical => true %>
 <%= f.check_boxes :allow_anonymous_posting, [['Allow anonymous users to post', true]], :label => '', :vertical => true, :single => true %>
 <%= f.select :subscription_template_id, [['Use default subscription template', nil]] + MailTemplate.select_options, :label => 'Topic subscription email'.t, :vertical => true %>
+<%= f.check_boxes :add_to_site, [["Run the add to site wizard".t,true]], :single => true, :vertical => true -%>
 <%= f.submit_tag @forum_category.id ? 'Update Forum Category' : 'Create Forum Category', :vertical => true%>
 <% end -%>
 </div>

@@ -11,6 +11,8 @@ class ForumCategory < DomainModel
   validates_presence_of :name
   validates_presence_of :content_filter
 
+  attr_accessor :add_to_site
+
   cached_content :identifier => :url
 
   validates_numericality_of :weight, :only_integer => true

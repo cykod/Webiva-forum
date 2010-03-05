@@ -57,7 +57,7 @@ class Forum::AdminController < ModuleController
 
   def category
     if @forum_category.nil?
-      @forum_category = ForumCategory.new(params[:forum_category])
+      @forum_category = ForumCategory.new(params[:forum_category] || { :add_to_site => true })
       cms_page_path ['Content'], 'Create a new Forum Category'
     else
       cms_page_path ['Content'], ['%s Forums', forum_category_url_for, @forum_category.name]
@@ -66,7 +66,11 @@ class Forum::AdminController < ModuleController
     if request.post? && params[:forum_category]
       if @forum_category.update_attributes(params[:forum_category])
 	flash[:notice] = params[:path][0] ? 'Updated Forum Category Configuration'.t : 'Created a new Forum Category'.t
-	redirect_to forum_category_url_for
+	if @forum_category.add_to_site
+	  redirect_to :controller => '/forum/wizard', :forum_category_id => @forum_category.id
+	else
+	  redirect_to forum_category_url_for
+	end
       end
     end
   end
