@@ -31,6 +31,7 @@ class Forum::PageFeature < ParagraphFeature
 
   feature :forum_page_list, :default_feature => <<-FEATURE
     <cms:category>
+      <h1><cms:name/></h1>
       <cms:forums>
         <cms:forum>
           <h2><cms:forum_link><cms:name/></cms:forum_link></h2>
