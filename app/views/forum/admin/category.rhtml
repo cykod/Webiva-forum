@@ -7,8 +7,8 @@
 <%= f.check_boxes :allow_attachments, [['Allow users to upload attachments', true]], :vertical => true, :single => true %>
 <%= f.text_field :file_size_limit, :vertical => true %>
 <%= f.filemanager_folder :folder_id, :vertical => true %>
-<%= f.access_control :admin_permission, 'Who is allowed to administer these forums', :vertical => true %>
-<%= f.access_control :post_permission, 'Who is allowed to post to these forums', :vertical => true %>
+<%= f.access_control :admin_permission, 'Limi who is allowed to administer these forums', :vertical => true %>
+<%= f.access_control :post_permission, 'Limit who is allowed to post to these forums', :vertical => true %>
 <%= f.check_boxes :allow_anonymous_posting, [['Allow anonymous users to post', true]], :label => '', :vertical => true, :single => true %>
 <%= f.select :subscription_template_id, [['Use default subscription template', nil]] + MailTemplate.select_options, :label => 'Topic subscription email'.t, :vertical => true %>
 <%= f.check_boxes :add_to_site, [["Run the add to site wizard".t,true]], :single => true, :vertical => true -%>

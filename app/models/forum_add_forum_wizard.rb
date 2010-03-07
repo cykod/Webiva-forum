@@ -76,6 +76,10 @@ class ForumAddForumWizard < HashModel
     new_para.add_page_input(:input,:page_arg_0,:forum_path)
     new_para.add_page_input(:topic,:page_arg_1,:id)
     new_para.save
+
+    list_revision.make_real
+    view_revision.make_real
+    new_revision.make_real
   end
 end
 
