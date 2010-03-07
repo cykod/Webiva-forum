@@ -23,8 +23,8 @@ describe ForumAddForumWizard do
                                      )
     wizard.add_to_site!
 
-    SiteNode.find_by_node_path('/forums').should_not be_nil
-    SiteNode.find_by_node_path('/forums/view').should_not be_nil
-    SiteNode.find_by_node_path('/forums/new').should_not be_nil
+    SiteNode.find_by_node_path('/tester/forums').should_not be_nil
+    SiteNode.find_by_node_path('/tester/forums/view').should_not be_nil
+    SiteNode.find_by_node_path('/tester/forums/new').should_not be_nil
   end
 end
