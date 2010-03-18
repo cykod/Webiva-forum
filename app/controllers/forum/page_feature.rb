@@ -219,6 +219,7 @@ class Forum::PageFeature < ParagraphFeature
       <cms:post_form>
         <cms:new_post>
           <cms:errors><div class='errors'><cms:value/></div></cms:errors>
+          <cms:name>Posted By:<br/><cms:posted_by/><br/></cms:name>
           Subject:<br/><cms:subject/><br/>
           Body:<br/><cms:body/><br/>
           <cms:attachment>
@@ -248,6 +249,8 @@ class Forum::PageFeature < ParagraphFeature
 
       c.form_for_tag('post_form:new_post','post', :html => {:multipart => true}) { |t| t.locals.post = data[:post] }
         c.form_error_tag('post_form:new_post:errors')
+        c.expansion_tag('post_form:new_post:name') { |t| data[:require_posted_by] }
+        c.field_tag('post_form:new_post:name:posted_by')
         c.field_tag('post_form:new_post:subject')
         c.field_tag('post_form:new_post:body', :control => 'text_area', :rows => 6, :cols => 50)
         c.expansion_tag('post_form:new_post:attachment') { |t| t.locals.post.can_add_attachments? }

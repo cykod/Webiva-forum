@@ -38,7 +38,7 @@ class ForumPost < DomainModel
       elsif self.end_user.username
 	self.posted_by = self.end_user.username
       else
-	self.posted_by = self.end_user.email
+	self.posted_by = self.end_user.name
       end
     end
 
@@ -64,6 +64,8 @@ class ForumPost < DomainModel
 
     self.first_post = self.forum_topic.forum_posts.count == 0
     self.posted_at = Time.new
+
+    self.end_user.update_name(self.posted_by) if self.end_user
   end
 
   def after_create

@@ -204,6 +204,8 @@ class Forum::PageRenderer < ParagraphRenderer
       end
     end
 
+    @require_posted_by = (myself.first_name.blank? && myself.last_name.blank?)
+
     cache_obj = @topic ? @topic : @forum
 
     allowed_to_post = true
@@ -216,6 +218,7 @@ class Forum::PageRenderer < ParagraphRenderer
     end
 
     display_string = allowed_to_post ? 'allowed' : 'not_allowed'
+    display_string << (@require_posted_by ? '_posted_by' : '_posted_by_end_user')
 
     result = renderer_cache(cache_obj, display_string, :skip => request.post?) do |cache|
 
@@ -233,7 +236,7 @@ class Forum::PageRenderer < ParagraphRenderer
 	    handle_file_upload params[:post], 'attachment_id', {:folder => @post.upload_folder_id}
 	  end
 
-	  if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id))
+	  if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id, :posted_by))
 
 	    action = @topic ? 'new_post' : 'new_topic'
 	    action_path = "/forum/#{action}"
