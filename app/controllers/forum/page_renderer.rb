@@ -204,8 +204,6 @@ class Forum::PageRenderer < ParagraphRenderer
       end
     end
 
-    @require_posted_by = (myself.first_name.blank? && myself.last_name.blank?)
-
     cache_obj = @topic ? @topic : @forum
 
     allowed_to_post = true
@@ -218,7 +216,7 @@ class Forum::PageRenderer < ParagraphRenderer
     end
 
     display_string = allowed_to_post ? 'allowed' : 'not_allowed'
-    display_string << (@require_posted_by ? '_posted_by' : '_posted_by_end_user')
+    display_string << (myself.missing_name? ? '_missing_name' : '_have_name')
 
     result = renderer_cache(cache_obj, display_string, :skip => request.post?) do |cache|
 

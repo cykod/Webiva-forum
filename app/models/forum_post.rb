@@ -1,7 +1,7 @@
 class ForumPost < DomainModel
   belongs_to :forum_forum
   belongs_to :forum_topic
-  belongs_to :end_user
+  has_end_user :end_user_id, :name_column => :posted_by
   belongs_to :moderated_by, :class_name => 'EndUser'
   has_many :forum_post_attachments
 
@@ -32,14 +32,8 @@ class ForumPost < DomainModel
   end
 
   def before_validation_on_create
-    if self.posted_by.nil? && self.end_user
-      if self.end_user.first_name && self.end_user.last_name
-	self.posted_by = self.end_user.first_name + ' ' + self.end_user.last_name
-      elsif self.end_user.username
-	self.posted_by = self.end_user.username
-      else
-	self.posted_by = self.end_user.name
-      end
+    if self.posted_by.nil?
+      self.posted_by = self.end_user ? self.end_user.name : 'Anonymous'.t
     end
 
     if self.subject.blank? && self.forum_topic
@@ -64,8 +58,6 @@ class ForumPost < DomainModel
 
     self.first_post = self.forum_topic.forum_posts.count == 0
     self.posted_at = Time.new
-
-    self.end_user.update_name(self.posted_by) if self.end_user
   end
 
   def after_create
