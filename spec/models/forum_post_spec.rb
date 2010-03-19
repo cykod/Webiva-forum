@@ -42,7 +42,6 @@ describe ForumPost do
 
       @post.should have(1).errors_on(:body)
       @post.should have(1).errors_on(:subject)
-      @post.should have(1).errors_on(:posted_by)
       @post.should have(1).errors_on(:forum_forum_id)
     end
 

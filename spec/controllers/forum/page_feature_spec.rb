@@ -88,6 +88,11 @@ describe Forum::PageFeature, :type => :view do
       @options = Forum::PageController::NewPostOptions.new( {:category_page_id => @category_page_node.id,
 							     :forum_page_id => @forum_page_node.id} )
 
+      @user = create_end_user
+      @user.save
+
+      @feature.should_receive(:myself).and_return(@user)
+
       @post = @forum.forum_posts.build
       @output = @feature.forum_page_new_post_feature({:post => @post, :topic => nil, :forum => @forum, :options => @options})
       @output.should include( 'Subject' )
@@ -96,6 +101,11 @@ describe Forum::PageFeature, :type => :view do
     it "should display a new post form" do
       @options = Forum::PageController::NewPostOptions.new( {:category_page_id => @category_page_node.id,
 							     :forum_page_id => @forum_page_node.id} )
+
+      @user = create_end_user
+      @user.save
+
+      @feature.should_receive(:myself).and_return(@user)
 
       @post = @topic.build_post
       @output = @feature.forum_page_new_post_feature({:post => @post, :topic => @topic, :forum => @forum, :options => @options})
