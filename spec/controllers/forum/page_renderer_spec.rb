@@ -288,6 +288,34 @@ describe Forum::PageRenderer, :type => :controller do
       @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
     end
 
+    it "should be able to create a new post and set end user name" do
+      mock_user
+      @myself.first_name = nil
+      @myself.last_name = nil
+      @myself.full_name = nil
+      @myself.save
+
+      @topic_page_node = SiteVersion.default.root.add_subpage('topic')
+      options = {:forum_page_id => @topic_page_node.id}
+      inputs = { :input => [:topic, @topic] } 
+      @rnd = generate_page_renderer('new_post', options, inputs)
+
+      @topic.should_receive(:forum_forum).and_return(@forum)
+      @forum.should_receive(:allowed_to_create_post?).and_return(true)
+      renderer_post @rnd, { :post => {:posted_by => 'Test Name', :body => 'My Test Post'} }
+
+      @post = ForumPost.find(:first, :order => 'id DESC')
+      @post.body.should == 'My Test Post'
+      @post.subject.should == @topic.default_subject
+
+      @myself.reload
+      @myself.first_name.should == 'Test'
+      @myself.last_name.should == 'Name'
+      @myself.full_name.should == 'Test Name'
+
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+    end
+
     it "should be able to display recent topics form editor mode" do
       @rnd = generate_page_renderer('recent')
       @rnd.should_receive(:editor?).at_least(:once).and_return(true)
