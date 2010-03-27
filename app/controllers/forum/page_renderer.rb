@@ -108,20 +108,20 @@ class Forum::PageRenderer < ParagraphRenderer
 
     if editor?
       if @options.forum_forum_id.blank?
-	@topic = ForumTopic.find(:first)
-	@forum = @topic.forum_forum if @topic
+        @topic = ForumTopic.find(:first)
+        @forum = @topic.forum_forum if @topic
       else
-	@forum = ForumForum.find_by_id @options.forum_forum_id
-	@topic = @forum.forum_topics.find(:first) if @forum;
+        @forum = ForumForum.find_by_id @options.forum_forum_id
+        @topic = @forum.forum_topics.find(:first) if @forum;
       end
 
       return render_paragraph :text => 'No forum found.' if @forum.nil?
     else
       if @options.forum_forum_id.blank?
-	conn_type, conn_id = page_connection(:forum)
-	@forum = ForumForum.find_by_url conn_id if conn_type == :url && ! conn_id.blank?
+        conn_type, conn_id = page_connection(:forum)
+        @forum = ForumForum.find_by_url conn_id if conn_type == :url && ! conn_id.blank?
       else
-	@forum = ForumForum.find @options.forum_forum_id
+        @forum = ForumForum.find @options.forum_forum_id
       end
 
       conn_type, conn_id = page_connection(:topic)
@@ -136,24 +136,24 @@ class Forum::PageRenderer < ParagraphRenderer
 
       default_subscription_template_id = Forum::AdminController.module_options.subscription_template_id
       if @topic.subscribe?(myself, default_subscription_template_id)
-	@subscription = ForumSubscription.find_by_end_user_id_and_forum_topic_id(myself.id, @topic.id)
-	@subscription = @topic.build_subscription(myself) if @subscription.nil?
-	display_string << "_#{@subscription.id ? 'unsubscribed' : 'subscribed'}"
-	if request.post?
-	  if params[:subscribe] && params[:subscribe].blank?
-	    @subscription.destroy if @subscription.subscribed?
-	    @subscription = @topic.build_subscription(myself)
-	    flash[:notice] = 'Unsubscribed from topic';
-	  else
-	    @subscription.save unless @subscription.subscribed?
-	    flash[:notice] = 'Subscribed to topic';
-	  end
-	end
+        @subscription = ForumSubscription.find_by_end_user_id_and_forum_topic_id(myself.id, @topic.id)
+        @subscription = @topic.build_subscription(myself) if @subscription.nil?
+        display_string << "_#{@subscription.id ? 'unsubscribed' : 'subscribed'}"
+        if request.post?
+          if params[:subscribe] && params[:subscribe].blank?
+            @subscription.destroy if @subscription.subscribed?
+            @subscription = @topic.build_subscription(myself)
+            flash[:notice] = 'Unsubscribed from topic';
+          else
+            @subscription.save unless @subscription.subscribed?
+            flash[:notice] = 'Subscribed to topic';
+          end
+        end
       end
 
       result = renderer_cache(@topic, display_string, :skip => request.post?) do |cache|
-	@pages, @posts = @topic.forum_posts.approved_posts.paginate(posts_page, :per_page => @options.posts_per_page, :order => 'posted_at')
-	cache[:output] = forum_page_topic_feature
+        @pages, @posts = @topic.forum_posts.approved_posts.paginate(posts_page, :per_page => @options.posts_per_page, :order => 'posted_at')
+        cache[:output] = forum_page_topic_feature
       end
 
       set_content_node(@topic)
@@ -286,24 +286,24 @@ class Forum::PageRenderer < ParagraphRenderer
 
     result = renderer_cache(cache_obj, display_string) do |cache|
       if @forum_url
-	@forum = ForumForum.find_by_url @forum_url unless @forum
-	raise MissingPageException.new( site_node, language ) unless @forum
+        @forum = ForumForum.find_by_url @forum_url unless @forum
+        raise MissingPageException.new( site_node, language ) unless @forum
 
-	@category = @forum.forum_category unless @category
-	raise MissingPageException.new( site_node, language ) unless @category.url == @category_path
+        @category = @forum.forum_category unless @category
+        raise MissingPageException.new( site_node, language ) unless @category.url == @category_path
 
-	if @content
-	  @pages, @topics = @forum.forum_topics.topics_for_content(*@content).order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
-	else
-	  @pages, @topics = @forum.forum_topics.order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
-	end
+        if @content
+          @pages, @topics = @forum.forum_topics.topics_for_content(*@content).order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
+        else
+          @pages, @topics = @forum.forum_topics.order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
+        end
       elsif @category_path
-	@category = ForumCategory.find_by_url @category_path unless @category
-	raise MissingPageException.new( site_node, language ) unless @category
+        @category = ForumCategory.find_by_url @category_path unless @category
+        raise MissingPageException.new( site_node, language ) unless @category
 
-	@pages, @topics = @category.forum_topics.order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
+        @pages, @topics = @category.forum_topics.order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
       else
-	@pages, @topics = ForumTopic.order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
+        @pages, @topics = ForumTopic.order_by_recent_topics(1.day.ago).paginate(forum_page, :per_page => @options.topics_per_page)
       end
 
       cache[:output] = forum_page_recent_feature
