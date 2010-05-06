@@ -203,6 +203,9 @@ class Forum::PageFeature < ParagraphFeature
           <cms:attachment>
             Attachment:<br/><cms:file/><br/>
           </cms:attachment>
+          <cms:subscribe>
+            <cms:field/><br/>
+          </cms:subscribe>
           <cms:submit/>
         </cms:new_post>
       </cms:post_form>
@@ -225,6 +228,9 @@ class Forum::PageFeature < ParagraphFeature
           <cms:attachment>
             Attachment:<br/><cms:file/><br/>
           </cms:attachment>
+          <cms:subscribe>
+            <cms:field/><br/>
+          </cms:subscribe>
           <cms:submit/>
         </cms:new_post>
       </cms:post_form>
@@ -255,6 +261,8 @@ class Forum::PageFeature < ParagraphFeature
         c.field_tag('post_form:new_post:body', :control => 'text_area', :rows => 6, :cols => 50)
         c.expansion_tag('post_form:new_post:attachment') { |t| t.locals.post.can_add_attachments? }
           c.field_tag('post_form:new_post:attachment:file', :field => 'attachment_id', :control => 'upload_document')
+        c.expansion_tag('post_form:new_post:subscribe') { |t| Forum::AdminController.module_options.subscription_template_id }
+          c.field_tag('post_form:new_post:subscribe:field', :field => 'subscribe', :control => 'check_boxes', :single => true, :options => [['Subscribe to topic', true]])
         c.submit_tag('post_form:new_post:submit', :default => 'Submit')
 
       c.expansion_tag('topic:reply_to_post') { |t| t.locals.post = data[:reply_to_post] }

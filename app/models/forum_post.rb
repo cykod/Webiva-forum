@@ -1,4 +1,6 @@
 class ForumPost < DomainModel
+  attr_accessor :subscribe
+
   belongs_to :forum_forum
   belongs_to :forum_topic
   has_end_user :end_user_id, :name_column => :posted_by

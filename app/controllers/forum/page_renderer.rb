@@ -230,6 +230,7 @@ class Forum::PageRenderer < ParagraphRenderer
       if allowed_to_post
 	@post = @topic ? @topic.build_post : @forum.forum_posts.build
 	@post.end_user = myself
+        @post.subscribe = true
 
 	if @content
 	  @post.content_type = @content[0]
@@ -240,6 +241,8 @@ class Forum::PageRenderer < ParagraphRenderer
 	  if @post.can_add_attachments?
 	    handle_file_upload params[:post], 'attachment_id', {:folder => @post.upload_folder_id}
 	  end
+
+          @post.subscribe = params[:post][:subscribe].blank? ? false : true
 
 	  if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id, :posted_by))
 
@@ -258,6 +261,18 @@ class Forum::PageRenderer < ParagraphRenderer
 
 	    default_subscription_template_id = Forum::AdminController.module_options.subscription_template_id
 	    @post.send_subscriptions!( {:url => posts_url}, default_subscription_template_id )
+
+            if @post.forum_topic.subscribe?(myself, default_subscription_template_id)
+              @subscription = ForumSubscription.find_by_end_user_id_and_forum_topic_id(myself.id, @post.forum_topic.id)
+              @subscription = @post.forum_topic.build_subscription(myself) if @subscription.nil?
+
+              if @post.subscribe
+                @subscription.save unless @subscription.subscribed?
+              else
+                @subscription.destroy if @subscription.subscribed?
+              end
+            end
+
 	    return redirect_paragraph posts_url
 	  end
 	end
