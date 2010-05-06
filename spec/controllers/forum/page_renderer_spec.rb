@@ -434,5 +434,73 @@ describe Forum::PageRenderer, :type => :controller do
       @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
     end
 
+    it "should be able to display edit post form" do
+      mock_user
+
+      @topic_page_node = SiteVersion.default.root.add_subpage('topic')
+      options = {:forum_page_id => @topic_page_node.id}
+      inputs = { :forum => [:url, @forum.url], :topic => [:id, @topic.id], :post => [:id, @post.id] } 
+      @rnd = generate_page_renderer('edit_post', options, inputs)
+      @rnd.should_render_feature('forum_page_edit_post')
+
+      renderer_get @rnd
+    end
+
+    it "should redirect edit post form" do
+      mock_user('notmypost@test.dev')
+
+      @topic_page_node = SiteVersion.default.root.add_subpage('topic')
+      options = {:forum_page_id => @topic_page_node.id}
+      inputs = { :forum => [:url, @forum.url], :topic => [:id, @topic.id], :post => [:id, @post.id] } 
+      @rnd = generate_page_renderer('edit_post', options, inputs)
+
+      renderer_get @rnd
+
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+    end
+
+    it "should be able to edit a post" do
+      mock_user
+
+      @topic_page_node = SiteVersion.default.root.add_subpage('topic')
+      options = {:forum_page_id => @topic_page_node.id}
+      inputs = { :forum => [:url, @forum.url], :topic => [:id, @topic.id], :post => [:id, @post.id] } 
+      @rnd = generate_page_renderer('edit_post', options, inputs)
+
+      renderer_post @rnd, {:post => {:body => 'New Body'}}
+
+      @post.reload
+      @post.body.should == 'New Body'
+
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+    end
+
+    it "should be able to create a new topic and subscribe to it" do
+      mock_user
+
+      @topic_page_node = SiteVersion.default.root.add_subpage('topic')
+      options = {:forum_page_id => @topic_page_node.id}
+      inputs = { :input => [:forum, @forum] } 
+      @rnd = generate_page_renderer('new_post', options, inputs)
+
+      @forum.should_receive(:allowed_to_create_topic?).and_return(true)
+
+      @module_options = mock :subscription_template_id => 1
+      Forum::AdminController.should_receive(:module_options).and_return(@module_options)
+
+      assert_difference 'ForumSubscription.count', 1 do
+        renderer_post @rnd, { :post => {:body => 'My Test Post', :subject => 'My Test Subject', :subscribe => true} }
+      end
+
+      @post = ForumPost.find(:first, :order => 'id DESC')
+      @post.body.should == 'My Test Post'
+      @post.subject.should == 'My Test Subject'
+      @post.forum_topic.subject.should == 'My Test Subject'
+
+      @subscription = ForumSubscription.user_subscriptions(@myself).find_by_forum_topic_id(@post.forum_topic.id)
+      @subscription.should_not be_nil
+
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+    end
   end
 end

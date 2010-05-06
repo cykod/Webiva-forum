@@ -75,11 +75,13 @@ describe Forum::PageFeature, :type => :view do
     end
 
     it "should display list of posts" do
+      @user = EndUser.new
       @options = Forum::PageController::TopicOptions.new( {:category_page_id => @category_page_node.id,
 							   :forum_page_id => @forum_page_node.id,
 							   :new_post_page_id => @new_post_page_node.id} )
 
       @pages, @posts = @topic.forum_posts.approved_posts.paginate(nil, :per_page => @options.posts_per_page, :order => 'posted_at')
+      @feature.should_receive(:myself).any_number_of_times.and_return(@user)
       @output = @feature.forum_page_topic_feature({:posts => @posts, :topic => @topic, :forum => @forum, :category => @category, :pages => @pages, :options => @options})
       @output.should include( @post.subject )
     end

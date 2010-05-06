@@ -157,6 +157,8 @@ class Forum::PageController < ParagraphController
 
     page_options :forum_page_id
 
+    validates_presence_of :forum_page_id
+
     options_form(
                  fld(:forum_page_id, :page_selector)
                  )

@@ -135,8 +135,8 @@ class Forum::PageFeature < ParagraphFeature
                   <div class="body"><cms:body/></div>
                   <cms:attachment><div class="attachment">Attachment: <cms:attachment_link><cms:name/></cms:attachment_link></div></cms:attachment>
                   <cms:edited><div class="edited">Modified on <span><cms:edited_at/></span></div></cms:edited>
-                  <span class="button"><cms:reply_link>Reply</cms:reply_link></span><br/>
-                  <cms:edit_link><span class="button">Edit</span></cms:edit_link>
+                  <cms:reply><span class="button"><cms:reply_link>Reply</cms:reply_link></span><br/></cms:reply>
+                  <cms:edit><span class="button"><cms:edit_link>Edit</cms:edit_link></span></cms:edit>
                 </td>
               </tr>
               </cms:post>
@@ -411,13 +411,11 @@ class Forum::PageFeature < ParagraphFeature
     context.expansion_tag(base + ':user') { |t| t.locals.user = t.locals.post.end_user }
       context.define_user_details_tags(base + ':user')
 
-    if data[:options] && data[:options].new_post_page_url
-      context.link_tag(base + ':reply') { |t| "#{data[:options].new_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.id}/#{t.locals.post.id}" }
-    end
+    context.expansion_tag(base + ':reply') { |t| data[:options] && data[:options].new_post_page_url }
+    context.link_tag(base + ':reply:reply') { |t| "#{data[:options].new_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.id}/#{t.locals.post.id}" }
 
-    if data[:options] && data[:options].edit_post_page_url
-      context.link_tag(base + ':edit') { |t| "#{data[:options].edit_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.id}/#{t.locals.post.id}" if myself.id == t.locals.post.end_user_id }
-    end
+    context.expansion_tag(base + ':edit') { |t| myself.id == t.locals.post.end_user_id && ! t.locals.post.end_user_id.nil? && data[:options] && data[:options].edit_post_page_url }
+    context.link_tag(base + ':edit:edit') { |t| "#{data[:options].edit_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.id}/#{t.locals.post.id}" }
   end
 
   def add_attachment_features(context, data, base='attachment')
