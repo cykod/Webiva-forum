@@ -134,7 +134,9 @@ class Forum::PageFeature < ParagraphFeature
                   <span class="by"><cms:posted_by/></span> <span class="date"><cms:posted_at format="%e.%b.%Y %l:%M%P"/></span>
                   <div class="body"><cms:body/></div>
                   <cms:attachment><div class="attachment">Attachment: <cms:attachment_link><cms:name/></cms:attachment_link></div></cms:attachment>
+                  <cms:edited><div class="edited">Modified on <span><cms:edited_at/></span></div></cms:edited>
                   <span class="button"><cms:reply_link>Reply</cms:reply_link></span><br/>
+                  <cms:edit_link><span class="button">Edit</span></cms:edit_link>
                 </td>
               </tr>
               </cms:post>
@@ -270,6 +272,47 @@ class Forum::PageFeature < ParagraphFeature
     end
   end
 
+  feature :forum_page_edit_post, :default_feature => <<-FEATURE
+    <cms:topic>
+      <cms:forum>
+        <h2>
+          <cms:forum_link><cms:name/></cms:forum_link>
+        </h2>
+        <hr/>
+      </cms:forum>
+      <h1><cms:topic_link><cms:subject/></cms:topic_link></h1>
+      <hr/>
+      <cms:post_form>
+        <cms:errors><div class='errors'><cms:value/></div></cms:errors>
+        Body:<br/><cms:body/><br/>
+        <cms:attachment>
+          Attachment:<br/><cms:file/><br/>
+        </cms:attachment>
+        <cms:submit/>
+      </cms:post_form>
+    </cms:topic>
+  FEATURE
+  
+  def forum_page_edit_post_feature(data)
+    webiva_feature(:forum_page_edit_post) do |c|
+      c.expansion_tag('category') { |t| t.locals.category = data[:forum].forum_category }
+        add_category_features(c, data)
+
+      c.expansion_tag('forum') { |t| t.locals.forum = data[:forum] }
+        add_forum_features(c, data)
+
+      c.expansion_tag('topic') { |t| t.locals.topic = data[:topic] }
+        add_topic_features(c, data)
+
+      c.form_for_tag('post_form','post', :html => {:multipart => true}) { |t| t.locals.post = data[:post] }
+        c.form_error_tag('post_form:errors')
+        c.field_tag('post_form:body', :control => 'text_area', :rows => 6, :cols => 50)
+        c.expansion_tag('post_form:attachment') { |t| t.locals.post.can_add_attachments? }
+          c.field_tag('post_form:attachment:file', :field => 'attachment_id', :control => 'upload_document')
+        c.submit_tag('post_form:submit', :default => 'Submit')
+    end
+  end
+
   feature :forum_page_recent, :default_feature => <<-FEATURE
     <h2>NEW ON THE FORUM</h2>
     <cms:topics>
@@ -359,6 +402,7 @@ class Forum::PageFeature < ParagraphFeature
     context.expansion_tag(base + ':attachment') { |t| t.locals.attachment = t.locals.post.attachment }
       add_attachment_features(context, data, base + ':attachment')
 
+    context.expansion_tag(base + ':edited') { |t| t.locals.post.edited_at }
     context.date_tag(base + ':edited_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.post.edited_at }
     context.value_tag(base + ':edited_ago') { |t| time_ago_in_words(t.locals.post.edited_at) }
     context.date_tag(base + ':posted_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.post.posted_at }
@@ -367,8 +411,12 @@ class Forum::PageFeature < ParagraphFeature
     context.expansion_tag(base + ':user') { |t| t.locals.user = t.locals.post.end_user }
       context.define_user_details_tags(base + ':user')
 
-    if data[:options] && data[:options].new_post_page_id && ! data[:options].new_post_page_id.blank?
+    if data[:options] && data[:options].new_post_page_url
       context.link_tag(base + ':reply') { |t| "#{data[:options].new_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.id}/#{t.locals.post.id}" }
+    end
+
+    if data[:options] && data[:options].edit_post_page_url
+      context.link_tag(base + ':edit') { |t| "#{data[:options].edit_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.id}/#{t.locals.post.id}" if myself.id == t.locals.post.end_user_id }
     end
   end
 

@@ -1,8 +1,0 @@
-<div class='cms_form'>
-<%  paragraph_options_form_for :list do |f| -%>
-    <%= f.select :forum_category_id, [['Use page connection', nil]] + ForumCategory.select_options, :label => 'Forum Category to Display'.t %>
-    <%= f.page_selector :category_page_id, :label => 'Forum Category Page'.t %>
-    <%= f.page_selector :forum_page_id, :label => 'Forum Page'.t %>
-    <%= f.select :forums_per_page, (1..50).to_a, :label => 'Forums per page'.t %>
-<% end -%>
-</div>

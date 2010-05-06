@@ -12,6 +12,7 @@ class Forum::PageRenderer < ParagraphRenderer
   paragraph :forum
   paragraph :topic
   paragraph :new_post
+  paragraph :edit_post
   paragraph :recent
 
   def categories
@@ -151,6 +152,8 @@ class Forum::PageRenderer < ParagraphRenderer
         end
       end
 
+      display_string << "_edit_#{myself.id}" if @options.edit_post_page_url
+
       result = renderer_cache(@topic, display_string, :skip => request.post?) do |cache|
         @pages, @posts = @topic.forum_posts.approved_posts.paginate(posts_page, :per_page => @options.posts_per_page, :order => 'posted_at')
         cache[:output] = forum_page_topic_feature
@@ -285,6 +288,49 @@ class Forum::PageRenderer < ParagraphRenderer
     set_title @forum.name, 'forum'
     set_title @topic ? @topic.subject[0..68] : @forum.name
     render_paragraph :text => result.output
+  end
+
+  def edit_post
+    @options = paragraph_options(:edit_post)
+
+    if editor?
+      @post = ForumPost.find :first
+      @topic = @post.forum_topic
+      @forum = @post.forum_forum
+      return render_paragraph :text => 'No post found.' if @post.nil?
+    else
+      conn_type, conn_id = page_connection(:forum)
+      @forum = ForumForum.find_by_url conn_id
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
+
+      conn_type, conn_id = page_connection(:topic)
+      @topic = @forum.forum_topics.find_by_id conn_id
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @topic
+
+      conn_type, conn_id = page_connection(:post)
+      @post = @topic.forum_posts.find_by_id conn_id
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @post
+    end
+
+    if ! editor?
+      posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
+      return redirect_paragraph posts_url if @post.end_user_id.nil? ||  myself.id != @post.end_user_id
+
+      if request.post? && params[:post]
+        if @post.can_add_attachments?
+          handle_file_upload params[:post], 'attachment_id', {:folder => @post.upload_folder_id}
+        end
+
+        if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id, :posted_by))
+          return redirect_paragraph posts_url
+        end
+      end
+    end
+
+    set_title @topic.subject[0..68], 'subject' if @topic
+    set_title @forum.name, 'forum'
+    set_title @topic ? @topic.subject[0..68] : @forum.name
+    render_paragraph :feature => :forum_page_edit_post
   end
 
   def recent
