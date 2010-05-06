@@ -190,7 +190,13 @@ class Forum::PageRenderer < ParagraphRenderer
 	  raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
 
 	  conn_type, conn_id = page_connection(:topic)
-	  @topic = @forum.forum_topics.find conn_id if conn_type == :id && ! conn_id.blank?
+	  @topic = @forum.forum_topics.find_by_id conn_id if conn_type == :id && ! conn_id.blank?
+
+          if @topic
+            conn_type, conn_id = page_connection(:post)
+            @reply_to_post = @topic.forum_posts.find_by_id conn_id if conn_type == :id && ! conn_id.blank?
+            @reply_to_post = @topic.first_post unless @reply_to_post
+          end
 	else
 	  return render_paragraph :text => '[Configure page connections]'
 	end
@@ -217,6 +223,7 @@ class Forum::PageRenderer < ParagraphRenderer
 
     display_string = allowed_to_post ? 'allowed' : 'not_allowed'
     display_string << (myself.missing_name? ? '_missing_name' : '_have_name')
+    display_string << "_#{@reply_to_post.id}" if @reply_to_post
 
     result = renderer_cache(cache_obj, display_string, :skip => request.post?) do |cache|
 

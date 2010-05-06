@@ -128,15 +128,13 @@ class Forum::PageFeature < ParagraphFeature
               <cms:post>
               <tr>
                 <td width="15%" align="center" valign="baseline">
-                  <cms:user><cms:img/></cms:user>
+                  <cms:user><cms:img size="thumb"/></cms:user>
                 </td>
                 <td width="85%" class="post" valign="baseline">
                   <span class="by"><cms:posted_by/></span> <span class="date"><cms:posted_at format="%e.%b.%Y %l:%M%P"/></span>
                   <div class="body"><cms:body/></div>
                   <cms:attachment><div class="attachment">Attachment: <cms:attachment_link><cms:name/></cms:attachment_link></div></cms:attachment>
-                  <cms:first>
-                    <span class="button"><cms:new_post_link>New Reply</cms:new_post_link></span><br/>
-                  </cms:first>
+                  <span class="button"><cms:reply_link>Reply</cms:reply_link></span><br/>
                 </td>
               </tr>
               </cms:post>
@@ -195,6 +193,7 @@ class Forum::PageFeature < ParagraphFeature
         <hr/>
       </cms:forum>
       <h1><cms:topic_link><cms:subject/></cms:topic_link></h1>
+      <cms:reply_to_post><p><cms:body/></p></cms:reply_to_post>
       <hr/>
       <cms:post_form>
         <cms:new_post>
@@ -258,6 +257,8 @@ class Forum::PageFeature < ParagraphFeature
           c.field_tag('post_form:new_post:attachment:file', :field => 'attachment_id', :control => 'upload_document')
         c.submit_tag('post_form:new_post:submit', :default => 'Submit')
 
+      c.expansion_tag('topic:reply_to_post') { |t| t.locals.post = data[:reply_to_post] }
+        add_post_features(c, data, 'topic:reply_to_post')
     end
   end
 
@@ -357,6 +358,10 @@ class Forum::PageFeature < ParagraphFeature
 
     context.expansion_tag(base + ':user') { |t| t.locals.user = t.locals.post.end_user }
       context.define_user_details_tags(base + ':user')
+
+    if data[:options] && data[:options].new_post_page_id && ! data[:options].new_post_page_id.blank?
+      context.link_tag(base + ':reply') { |t| "#{data[:options].new_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.id}/#{t.locals.post.id}" }
+    end
   end
 
   def add_attachment_features(context, data, base='attachment')

@@ -26,6 +26,7 @@ class Forum::PageController < ParagraphController
                                                 [:topic, 'Topic', :forum_topic_target],
                                                 [:forum_path, 'Forum Url', :path]],
                                      :topic => [[:id, 'Topic Id', :path]],
+                                     :post => [[:id, 'Post Id', :path]],
                                      :content => [[:content, 'Content Identifier', :content]]
                                    },
                         :triggers => [['New Post','new_post'], ['New Topic','new_topic']]
