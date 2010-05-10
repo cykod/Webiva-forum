@@ -5,18 +5,24 @@ class Forum::PageFeature < ParagraphFeature
   include ActionView::Helpers::DateHelper
   include ActionView::Helpers::NumberHelper
 
-  feature :forum_page_categories, :default_feature => <<-FEATURE
+  feature :forum_page_categories,
+    :default_css_file => '/components/forum/stylesheets/forum.css',
+    :default_feature => <<-FEATURE
     <cms:categories>
+      <div class="webiva_forum">
       <cms:category>
-        <h1><cms:name/> Forums</h1>
+        <div class="category_name"><cms:name/></div>
         <cms:forums>
           <cms:forum>
-            <h2><cms:forum_link><cms:name/></cms:forum_link></h2>
-            <cms:description><p><cms:value/></p></cms:description>
+            <div class="forum">
+              <div class="forum_name"><cms:forum_link><cms:name/></cms:forum_link></div>
+              <cms:description><div class="forum_description"><cms:value/></div></cms:description>
+            </div>
           </cms:forum>
         </cms:forums>
-        <cms:not_last><hr/></cms:not_last>
+        <cms:not_last><hr class="separator"/></cms:not_last>
       </cms:category>
+      </div>
     </cms:categories>
   FEATURE
 
@@ -29,16 +35,22 @@ class Forum::PageFeature < ParagraphFeature
     end
   end
 
-  feature :forum_page_list, :default_feature => <<-FEATURE
+  feature :forum_page_list,
+    :default_css_file => '/components/forum/stylesheets/forum.css',
+    :default_feature => <<-FEATURE
     <cms:category>
-      <h1><cms:name/></h1>
-      <cms:forums>
-        <cms:forum>
-          <h2><cms:forum_link><cms:name/></cms:forum_link></h2>
-          <cms:description><p><cms:value/></p></cms:description>
-        </cms:forum>
-        <cms:pages/>
-      </cms:forums>
+      <div class="webiva_forum">
+        <div class="category_name"><cms:name/></div>
+        <cms:forums>
+          <cms:forum>
+            <div class="forum">
+              <div class="forum_name"><cms:forum_link><cms:name/></cms:forum_link></div>
+              <cms:description><div class="forum_description"><cms:value/></div></cms:description>
+            </div>
+          </cms:forum>
+          <cms:pages><div class="pages"><cms:value/></div></cms:pages>
+        </cms:forums>
+      </div>
     </cms:category>
   FEATURE
   
@@ -58,39 +70,46 @@ class Forum::PageFeature < ParagraphFeature
     end
   end
 
-  feature :forum_page_forum, :default_feature => <<-FEATURE
+  feature :forum_page_forum,
+    :default_css_file => '/components/forum/stylesheets/forum.css',
+    :default_feature => <<-FEATURE
     <cms:category>
+      <div class="webiva_forum">
       <cms:forum>
-        <h1><cms:forum_link><cms:name/></cms:forum_link></h1>
-        <cms:description><p><cms:value/></p></cms:description>
-        <span class="button"><cms:new_topic_link>New Thread</cms:new_topic_link></span>
-        <hr/>
+        <div class="forum">
+          <div class="forum_name"><cms:forum_link><cms:name/></cms:forum_link></div>
+          <cms:description><div class="forum_description"><cms:value/></div></cms:description>
+          <div class="new_topic"><span class="button"><cms:new_topic_link>New Thread</cms:new_topic_link></span></div>
+        </div>
+
         <cms:topics>
           <cms:pages/>
-          <table class="topics">
+          <div class="forum_topics">
+          <table>
             <tr>
-              <th align="left" width="60%">Threads</th>
-              <th align="center" width="20%">Replies</th>
-              <th align="left" width="20%">Created</th>
+              <th class="subject">Threads</th>
+              <th class="replies">Replies</th>
+              <th class="created">Created</th>
             </tr>
           <cms:topic>
             <tr>
-              <td class="subject" valign="middle">
-                <cms:topic_link><cms:subject/></cms:topic_link>
+              <td class="subject">
+                <cms:topic_link><cms:subject/></cms:topic_link>, <span>by <cms:posted_by/></span>
               </td>
-              <td class="replies" align="center" valign="middle">
+              <td class="replies">
                 <cms:replies/>
               </td>
-              <td class="created" valign="middle">
-                <cms:created_ago/> ago<br/>
-                by <span><cms:posted_by/></span>
+              <td class="created">
+                <cms:created_ago/> ago
               </td>
             </tr>
           </cms:topic>
           </table>
+          </div>
           <cms:pages/>
         </cms:topics>
       </cms:forum>
+      </div>
     </cms:category>
   FEATURE
   
@@ -111,40 +130,47 @@ class Forum::PageFeature < ParagraphFeature
     end
   end
 
-  feature :forum_page_topic, :default_feature => <<-FEATURE
+  feature :forum_page_topic,
+    :default_css_file => '/components/forum/stylesheets/forum.css',
+    :default_feature => <<-FEATURE
     <cms:category>
+      <div class="webiva_forum">
       <cms:forum>
-        <h2><cms:forum_link><cms:name/></cms:forum_link></h2>
-        <hr/>
+        <div class="forum">
+          <div class="forum_name"><cms:forum_link><cms:name/></cms:forum_link></div>
+        </div>
+
         <cms:topic>
-          <h1><cms:subject/></h1>
-          <cms:subscription>
-            <cms:form/>
-          </cms:subscription>
-          <br/>
+          <div class="forum_topic">
+            <div class="topic_subject"><cms:topic_link><cms:subject/></cms:topic_link></div>
+            <cms:subscription><div class="subscription"><cms:form/></div></cms:subscription>
+          </div>
+
           <cms:posts>
-            <div class="pages"><cms:pages/></div>
-            <table class="posts">
+            <div class="forum_posts">
+              <div class="pages"><cms:pages/></div>
               <cms:post>
-              <tr>
-                <td width="15%" align="center" valign="baseline">
-                  <cms:user><cms:img size="thumb"/></cms:user>
-                </td>
-                <td width="85%" class="post" valign="baseline">
-                  <span class="by"><cms:posted_by/></span> <span class="date"><cms:posted_at format="%e.%b.%Y %l:%M%P"/></span>
-                  <div class="body"><cms:body/></div>
+                <div class="forum_post">
+                  <span class="user_icon"><cms:user><cms:img size="thumb"/></cms:user></span>
+                  <span class="post_content">
+                    <span class="by"><cms:posted_by/></span> <div class="date"><cms:posted_at format="%e.%b.%Y %l:%M%P"/></div>
+                    <div class="body"><cms:body/></div>
+                  </span>
                   <cms:attachment><div class="attachment">Attachment: <cms:attachment_link><cms:name/></cms:attachment_link></div></cms:attachment>
-                  <cms:edited><div class="edited">Modified on <span><cms:edited_at/></span></div></cms:edited>
-                  <cms:reply><span class="button"><cms:reply_link>Reply</cms:reply_link></span><br/></cms:reply>
-                  <cms:edit><span class="button"><cms:edit_link>Edit</cms:edit_link></span></cms:edit>
-                </td>
-              </tr>
+                  <div class="actions">
+                    <cms:edited><div class="edited">Modified on <span><cms:edited_at/></span></div></cms:edited>
+                    <cms:edit><span class="button"><cms:edit_link>Edit</cms:edit_link></span></cms:edit>
+                    <cms:reply><span class="button"><cms:reply_link>Reply</cms:reply_link></span></cms:reply>
+                  </div>
+                </div>
+                <hr class="separator"/>
               </cms:post>
-            </table>
-            <div class="pages"><cms:pages/></div>
+              <div class="pages"><cms:pages/></div>
+            </div>
           </cms:posts>
         </cms:topic>
       </cms:forum>
+      </div>
     </cms:category>
   FEATURE
   
@@ -186,60 +212,63 @@ class Forum::PageFeature < ParagraphFeature
     end
   end
 
-  feature :forum_page_new_post, :default_feature => <<-FEATURE
-    <cms:topic>
+  feature :forum_page_new_post,
+    :default_css_file => '/components/forum/stylesheets/forum.css',
+    :default_feature => <<-FEATURE
+    <div class="webiva_forum">
       <cms:forum>
-        <h2>
-          <cms:forum_link><cms:name/></cms:forum_link>
-        </h2>
-        <hr/>
+        <div class="forum">
+          <div class="forum_name"><cms:forum_link><cms:name/></cms:forum_link></div>
+          <cms:description><div class="forum_description"><cms:value/></div></cms:description>
+        </div>
       </cms:forum>
-      <h1><cms:topic_link><cms:subject/></cms:topic_link></h1>
-      <cms:reply_to_post><p><cms:body/></p></cms:reply_to_post>
-      <hr/>
-      <cms:post_form>
-        <cms:new_post>
-          <cms:errors><div class='errors'><cms:value/></div></cms:errors>
-          <cms:no_name>Posted By:<br/><cms:posted_by/><br/></cms:no_name>
-          Body:<br/><cms:body/><br/>
-          <cms:attachment>
-            Attachment:<br/><cms:file/><br/>
-          </cms:attachment>
-          <cms:subscribe>
-            <cms:field/><br/>
-          </cms:subscribe>
-          <cms:submit/>
-        </cms:new_post>
-      </cms:post_form>
-      <cms:no_post_form>
-        <div class='errors'>Must be logged in to reply.</div>
-      </cms:no_post_form>
-    </cms:topic>
-    <cms:no_topic>
-      <cms:forum>
-        <h1><cms:forum_link><cms:name/></cms:forum_link></h1>
-        <cms:description><p><cms:value/></p></cms:description>
-        <hr/>
-      </cms:forum>
-      <cms:post_form>
-        <cms:new_post>
-          <cms:errors><div class='errors'><cms:value/></div></cms:errors>
-          <cms:no_name>Posted By:<br/><cms:posted_by/><br/></cms:no_name>
-          Subject:<br/><cms:subject/><br/>
-          Body:<br/><cms:body/><br/>
-          <cms:attachment>
-            Attachment:<br/><cms:file/><br/>
-          </cms:attachment>
-          <cms:subscribe>
-            <cms:field/><br/>
-          </cms:subscribe>
-          <cms:submit/>
-        </cms:new_post>
-      </cms:post_form>
-      <cms:no_post_form>
-        <div class='errors'>Must be logged in to create a new topic.</div>
-      </cms:no_post_form>
-    </cms:no_topic>
+      <cms:topic>
+        <div class="forum_topic">
+          <div class="topic_subject"><cms:topic_link><cms:subject/></cms:topic_link></div>
+        </div>
+        <cms:reply_to_post>
+          <div class="forum_post reply_to_post">
+            <span class="user_icon"><cms:user><cms:img size="thumb"/></cms:user></span>
+            <span class="post_content">
+              <span class="by"><cms:posted_by/></span> <div class="date"><cms:posted_at format="%e.%b.%Y %l:%M%P"/></div>
+              <div class="body"><cms:body/></div>
+            </span>
+            <br class="clear"/>
+          </div>
+        </cms:reply_to_post>
+      </cms:topic>
+      <div class="new_post">
+      <fieldset>
+      <cms:no_topic><legend>Start a new Topic</legend></cms:no_topic>
+      <cms:topic><legend>Reply to Post</legend></cms:topic>
+      <ul>
+        <cms:post_form>
+          <cms:new_post>
+              <cms:errors><li class='errors'><cms:value/></li></cms:errors>
+              <cms:no_name>Posted By:<br/><cms:posted_by/><br/></cms:no_name>
+              <li><cms:subject_label/>
+              <cms:subject/></li>
+              <li><cms:body_label/>
+              <cms:body/></li>
+              <cms:attachment>
+                <li><cms:file_label>Attachment</cms:file_label>
+                <cms:file/></li>
+              </cms:attachment>
+              <cms:subscribe><label>&nbsp;</label>
+                <li><cms:field_label></cms:field_label>
+                <cms:field/></li>
+              </cms:subscribe>
+              <li><label>&nbsp;</label>
+              <cms:submit/></li>
+          </cms:new_post>
+        </cms:post_form>
+        <cms:no_post_form>
+          <li class='errors'>Must be logged in to post.</li>
+        </cms:no_post_form>
+      </ul>
+      </fieldset>
+      </div>
+    </div>
   FEATURE
   
   def forum_page_new_post_feature(data)
@@ -264,15 +293,17 @@ class Forum::PageFeature < ParagraphFeature
         c.expansion_tag('post_form:new_post:attachment') { |t| t.locals.post.can_add_attachments? }
           c.field_tag('post_form:new_post:attachment:file', :field => 'attachment_id', :control => 'upload_document')
         c.expansion_tag('post_form:new_post:subscribe') { |t| Forum::AdminController.module_options.subscription_template_id }
-          c.field_tag('post_form:new_post:subscribe:field', :field => 'subscribe', :control => 'check_boxes', :single => true, :options => [['Subscribe to topic', true]])
-        c.submit_tag('post_form:new_post:submit', :default => 'Submit')
+          c.field_tag('post_form:new_post:subscribe:field', :field => 'subscribe', :control => 'check_boxes', :single => true, :options => [['Subscribe to topic'.t, true]])
+        c.button_tag('post_form:new_post:submit')
 
       c.expansion_tag('topic:reply_to_post') { |t| t.locals.post = data[:reply_to_post] }
         add_post_features(c, data, 'topic:reply_to_post')
     end
   end
 
-  feature :forum_page_edit_post, :default_feature => <<-FEATURE
+  feature :forum_page_edit_post,
+    :default_css_file => '/components/forum/stylesheets/forum.css',
+    :default_feature => <<-FEATURE
     <cms:topic>
       <cms:forum>
         <h2>
@@ -313,7 +344,9 @@ class Forum::PageFeature < ParagraphFeature
     end
   end
 
-  feature :forum_page_recent, :default_feature => <<-FEATURE
+  feature :forum_page_recent,
+    :default_css_file => '/components/forum/stylesheets/forum.css',
+    :default_feature => <<-FEATURE
     <h2>NEW ON THE FORUM</h2>
     <cms:topics>
       <cms:topic>
