@@ -254,8 +254,8 @@ class Forum::PageFeature < ParagraphFeature
                 <li><cms:file_label>Attachment</cms:file_label>
                 <cms:file/></li>
               </cms:attachment>
-              <cms:subscribe><label>&nbsp;</label>
-                <li><cms:field_label></cms:field_label>
+              <cms:subscribe>
+                <li><label>&nbsp;</label>
                 <cms:field/></li>
               </cms:subscribe>
               <li><label>&nbsp;</label>
