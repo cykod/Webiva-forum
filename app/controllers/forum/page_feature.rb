@@ -304,24 +304,37 @@ class Forum::PageFeature < ParagraphFeature
   feature :forum_page_edit_post,
     :default_css_file => '/components/forum/stylesheets/forum.css',
     :default_feature => <<-FEATURE
-    <cms:topic>
+    <div class="webiva_forum">
       <cms:forum>
-        <h2>
-          <cms:forum_link><cms:name/></cms:forum_link>
-        </h2>
-        <hr/>
+        <div class="forum">
+          <div class="forum_name"><cms:forum_link><cms:name/></cms:forum_link></div>
+          <cms:description><div class="forum_description"><cms:value/></div></cms:description>
+        </div>
       </cms:forum>
-      <h1><cms:topic_link><cms:subject/></cms:topic_link></h1>
-      <hr/>
-      <cms:post_form>
-        <cms:errors><div class='errors'><cms:value/></div></cms:errors>
-        Body:<br/><cms:body/><br/>
-        <cms:attachment>
-          Attachment:<br/><cms:file/><br/>
-        </cms:attachment>
-        <cms:submit/>
-      </cms:post_form>
-    </cms:topic>
+      <cms:topic>
+        <div class="forum_topic">
+          <div class="topic_subject"><cms:topic_link><cms:subject/></cms:topic_link></div>
+        </div>
+      </cms:topic>
+      <div class="new_post">
+      <fieldset>
+      <cms:topic><legend>Edit Your Post</legend></cms:topic>
+      <ul>
+        <cms:post_form>
+          <cms:errors><li class='errors'><cms:value/></li></cms:errors>
+          <li><cms:body_label/>
+          <cms:body/></li>
+          <cms:attachment>
+            <li><cms:file_label>Attachment</cms:file_label>
+            <cms:file/></li>
+          </cms:attachment>
+          <li><label>&nbsp;</label>
+          <cms:submit/></li>
+        </cms:post_form>
+      </ul>
+      </fieldset>
+      </div>
+    </div>
   FEATURE
   
   def forum_page_edit_post_feature(data)
@@ -347,12 +360,16 @@ class Forum::PageFeature < ParagraphFeature
   feature :forum_page_recent,
     :default_css_file => '/components/forum/stylesheets/forum.css',
     :default_feature => <<-FEATURE
-    <h2>NEW ON THE FORUM</h2>
-    <cms:topics>
-      <cms:topic>
-        <p><cms:topic_link><cms:subject/></cms:topic_link></p>
-      </cms:topic>
-    </cms:topics>
+    <div class="webiva_forum">
+      <div class="forum_topics recent_topics">
+        <div class="new_topics_heading">NEW ON THE FORUM</div>
+        <cms:topics>
+          <cms:topic>
+            <div class="topic_subject"><cms:topic_link><cms:subject/></cms:topic_link></div>
+          </cms:topic>
+        </cms:topics>
+      </div>
+    </div>
   FEATURE
   
   def forum_page_recent_feature(data)
