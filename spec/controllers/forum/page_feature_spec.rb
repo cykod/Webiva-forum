@@ -39,6 +39,7 @@ describe Forum::PageFeature, :type => :view do
       @post.save
       @topic.reload
       @feature = build_feature('/forum/page_feature')
+      @feature.should_receive(:require_css).any_number_of_times
 
       @category_page_node = SiteVersion.default.root.add_subpage('category')
       @forum_page_node = SiteVersion.default.root.add_subpage('forum')
