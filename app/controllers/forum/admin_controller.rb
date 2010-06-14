@@ -10,7 +10,7 @@ class Forum::AdminController < ModuleController
                               
   content_model :forums
   
-  content_action  'Create a new Forum Category', { :controller => '/forum/admin', :action => 'category' } 
+  content_action  'Create a new Forum Category', { :controller => '/forum/admin', :action => 'category' }, :permit => 'forum_config'
 
   register_permission_category :forum, "Forum" ,"Permissions for Writing to and Managing Forums"
   
