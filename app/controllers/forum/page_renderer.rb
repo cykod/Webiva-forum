@@ -12,6 +12,7 @@ class Forum::PageRenderer < ParagraphRenderer
   paragraph :forum
   paragraph :topic
   paragraph :new_post
+  paragraph :edit_post
   paragraph :recent
 
   def categories
@@ -151,6 +152,8 @@ class Forum::PageRenderer < ParagraphRenderer
         end
       end
 
+      display_string << "_edit_#{myself.id}" if @options.edit_post_page_url
+
       result = renderer_cache(@topic, display_string, :skip => request.post?) do |cache|
         @pages, @posts = @topic.forum_posts.approved_posts.paginate(posts_page, :per_page => @options.posts_per_page, :order => 'posted_at')
         cache[:output] = forum_page_topic_feature
@@ -190,7 +193,13 @@ class Forum::PageRenderer < ParagraphRenderer
 	  raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
 
 	  conn_type, conn_id = page_connection(:topic)
-	  @topic = @forum.forum_topics.find conn_id if conn_type == :id && ! conn_id.blank?
+	  @topic = @forum.forum_topics.find_by_id conn_id if conn_type == :id && ! conn_id.blank?
+
+          if @topic
+            conn_type, conn_id = page_connection(:post)
+            @reply_to_post = @topic.forum_posts.find_by_id conn_id if conn_type == :id && ! conn_id.blank?
+            @reply_to_post = @topic.first_post unless @reply_to_post
+          end
 	else
 	  return render_paragraph :text => '[Configure page connections]'
 	end
@@ -217,12 +226,14 @@ class Forum::PageRenderer < ParagraphRenderer
 
     display_string = allowed_to_post ? 'allowed' : 'not_allowed'
     display_string << (myself.missing_name? ? '_missing_name' : '_have_name')
+    display_string << "_#{@reply_to_post.id}" if @reply_to_post
 
     result = renderer_cache(cache_obj, display_string, :skip => request.post?) do |cache|
 
       if allowed_to_post
 	@post = @topic ? @topic.build_post : @forum.forum_posts.build
 	@post.end_user = myself
+        @post.subscribe = true
 
 	if @content
 	  @post.content_type = @content[0]
@@ -233,6 +244,8 @@ class Forum::PageRenderer < ParagraphRenderer
 	  if @post.can_add_attachments?
 	    handle_file_upload params[:post], 'attachment_id', {:folder => @post.upload_folder_id}
 	  end
+
+          @post.subscribe = params[:post][:subscribe].blank? ? false : true
 
 	  if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id, :posted_by))
 
@@ -251,6 +264,18 @@ class Forum::PageRenderer < ParagraphRenderer
 
 	    default_subscription_template_id = Forum::AdminController.module_options.subscription_template_id
 	    @post.send_subscriptions!( {:url => posts_url}, default_subscription_template_id )
+
+            if @post.forum_topic.subscribe?(myself, default_subscription_template_id)
+              @subscription = ForumSubscription.find_by_end_user_id_and_forum_topic_id(myself.id, @post.forum_topic.id)
+              @subscription = @post.forum_topic.build_subscription(myself) if @subscription.nil?
+
+              if @post.subscribe
+                @subscription.save unless @subscription.subscribed?
+              else
+                @subscription.destroy if @subscription.subscribed?
+              end
+            end
+
 	    return redirect_paragraph posts_url
 	  end
 	end
@@ -263,6 +288,49 @@ class Forum::PageRenderer < ParagraphRenderer
     set_title @forum.name, 'forum'
     set_title @topic ? @topic.subject[0..68] : @forum.name
     render_paragraph :text => result.output
+  end
+
+  def edit_post
+    @options = paragraph_options(:edit_post)
+
+    if editor?
+      @post = ForumPost.find :first
+      @topic = @post.forum_topic
+      @forum = @post.forum_forum
+      return render_paragraph :text => 'No post found.' if @post.nil?
+    else
+      conn_type, conn_id = page_connection(:forum)
+      @forum = ForumForum.find_by_url conn_id
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
+
+      conn_type, conn_id = page_connection(:topic)
+      @topic = @forum.forum_topics.find_by_id conn_id
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @topic
+
+      conn_type, conn_id = page_connection(:post)
+      @post = @topic.forum_posts.find_by_id conn_id
+      raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @post
+    end
+
+    if ! editor?
+      posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
+      return redirect_paragraph posts_url if @post.end_user_id.nil? ||  myself.id != @post.end_user_id
+
+      if request.post? && params[:post]
+        if @post.can_add_attachments?
+          handle_file_upload params[:post], 'attachment_id', {:folder => @post.upload_folder_id}
+        end
+
+        if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id, :posted_by))
+          return redirect_paragraph posts_url
+        end
+      end
+    end
+
+    set_title @topic.subject[0..68], 'subject' if @topic
+    set_title @forum.name, 'forum'
+    set_title @topic ? @topic.subject[0..68] : @forum.name
+    render_paragraph :feature => :forum_page_edit_post
   end
 
   def recent

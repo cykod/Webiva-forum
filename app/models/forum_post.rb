@@ -1,4 +1,6 @@
 class ForumPost < DomainModel
+  attr_accessor :subscribe
+
   belongs_to :forum_forum
   belongs_to :forum_topic
   has_end_user :end_user_id, :name_column => :posted_by
@@ -163,7 +165,7 @@ class ForumPost < DomainModel
   def send_subscriptions!(data, default_subscription_template_id)
     mail_template = self.forum_forum.subscription_template
     if mail_template.nil?
-      mail_template = MailTemplate.find default_subscription_template_id if default_subscription_template_id
+      mail_template = MailTemplate.find_by_id default_subscription_template_id if default_subscription_template_id
     end
     return if mail_template.nil?
 
