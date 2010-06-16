@@ -16,7 +16,6 @@ describe Forum::ManageController do
 
   it "should handle table list" do 
     mock_editor
-  
     # Test all the permutations of an active table
 
     controller.should handle_active_table(:forum_table) do |args|
