@@ -9,13 +9,16 @@ describe Forum::ManageController do
   reset_domain_tables :end_user,:forum_forums,:forum_posts,:forum_categories,:forum_topics
 
   before(:each) do
+
     @forum_category = create_forum_category
     @forum_category.save
   end
 
   it "should handle table list" do 
+    mock_editor
   
     # Test all the permutations of an active table
+
     controller.should handle_active_table(:forum_table) do |args|
       args[:path] = [@forum_category.id]
       post 'forum_table', args
