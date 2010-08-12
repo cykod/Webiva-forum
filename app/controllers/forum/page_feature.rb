@@ -433,8 +433,7 @@ class Forum::PageFeature < ParagraphFeature
       context.link_tag(base + ':new_post') { |t| "#{data[:options].new_post_page_url}/#{t.locals.forum.url}/#{t.locals.topic.id}" }
     end
 
-    context.expansion_tag(base + ':user') { |t| t.locals.user = t.locals.topic.end_user }
-      context.define_user_details_tags(base + ':user')
+    context.define_user_tags(base + ':user') { |t| t.locals.user = t.locals.topic.end_user }
 
     context.expansion_tag(base + ':first_post') { |t| t.locals.post = t.locals.topic.first_post }
       add_post_features(context, data, base + ':first_post')
@@ -458,8 +457,7 @@ class Forum::PageFeature < ParagraphFeature
     context.date_tag(base + ':posted_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.post.posted_at }
     context.value_tag(base + ':posted_ago') { |t| time_ago_in_words(t.locals.post.posted_at) }
 
-    context.expansion_tag(base + ':user') { |t| t.locals.user = t.locals.post.end_user }
-      context.define_user_details_tags(base + ':user')
+    context.define_user_tags(base + ':user') { |t| t.locals.user = t.locals.post.end_user }
 
     context.expansion_tag(base + ':reply') { |t| data[:options] && data[:options].new_post_page_url }
     context.link_tag(base + ':reply:reply') { |t| "#{data[:options].new_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.id}/#{t.locals.post.id}" }
