@@ -258,6 +258,8 @@ class Forum::PageFeature < ParagraphFeature
                 <li><label>&nbsp;</label>
                 <cms:field/></li>
               </cms:subscribe>
+              <li><cms:tag_names_label>Tags</cms:tag_names_label>
+              <cms:tag_names rows="2"/></li>
               <li><label>&nbsp;</label>
               <cms:submit/></li>
           </cms:new_post>
@@ -290,6 +292,7 @@ class Forum::PageFeature < ParagraphFeature
         c.field_tag('post_form:new_post:posted_by')
         c.field_tag('post_form:new_post:subject')
         c.field_tag('post_form:new_post:body', :control => 'text_area', :rows => 6, :cols => 50)
+        c.field_tag('post_form:new_post:tag_names', :control => 'text_area', :rows => 2, :cols => 50)
         c.expansion_tag('post_form:new_post:attachment') { |t| t.locals.post.can_add_attachments? }
           c.field_tag('post_form:new_post:attachment:file', :field => 'attachment_id', :control => 'upload_document')
         c.expansion_tag('post_form:new_post:subscribe') { |t| Forum::AdminController.module_options.subscription_template_id }

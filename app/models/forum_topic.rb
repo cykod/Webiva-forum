@@ -20,12 +20,11 @@ class ForumTopic < DomainModel
   named_scope :order_by_recent_topics, lambda { |from| {:order => sanitize_sql_for_conditions(['if(`forum_topics`.last_posted_at > ?, `forum_topics`.activity_count, 0) DESC, `forum_topics`.last_posted_at DESC', from]) }}
   named_scope :topics_for_content, lambda { |type, id| {:conditions => ['`forum_topics`.content_type = ? and `forum_topics`.content_id = ?', type, id]} }
 
-
+  has_content_tags
 
   def content_description(language)
     "Topic in \"%s\" Forum" / self.forum_forum.name
   end
-
 
   def build_post(options={})
     self.forum_posts.build( {:forum_forum_id => self.forum_forum_id}.merge(options) )
@@ -142,6 +141,8 @@ class ForumTopic < DomainModel
 
   def content_node_body(language)
     @posts = self.forum_posts.approved_posts.find(:all, :select => 'id, subject, body', :order => 'posted_at')
-    @posts ? @posts.map(&:body).join("\n") : ''
+    str = @posts ? @posts.map(&:body).join("\n") : ''
+    str += " #{self.tag_names}"
+    str
   end
 end

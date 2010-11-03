@@ -5,6 +5,8 @@
 <%= f.end_user_selector :posted_by, :id_field => 'end_user_id', :vertical => true, :required => true %>
 <%= f.text_area :body, :vertical => true %>
 <%= f.text_field :sticky, :vertical => true %>
+<%= f.text_area :tag_names, :rows => 5, :vertical => true, :label => 'Tags', :description => 'Comma separated list of tags' %>
+<%= f.spacer %>
 <%= f.submit_tag @topic.id ? 'Update Topic' : 'Create Topic', :vertical => true%>
 <% end -%>
 </div>

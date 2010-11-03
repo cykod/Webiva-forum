@@ -254,7 +254,7 @@ class Forum::PageRenderer < ParagraphRenderer
 
           @post.subscribe = params[:post][:subscribe].blank? ? false : true
 
-	  if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id, :posted_by))
+	  if @post.update_attributes(params[:post].slice(:subject, :body, :attachment_id, :posted_by, :tag_names))
 
 	    action = @topic ? 'new_post' : 'new_topic'
 	    action_path = "/forum/#{action}"

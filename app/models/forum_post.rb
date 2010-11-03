@@ -1,5 +1,5 @@
 class ForumPost < DomainModel
-  attr_accessor :subscribe
+  attr_accessor :subscribe, :tag_names
 
   belongs_to :forum_forum
   belongs_to :forum_topic
@@ -53,7 +53,7 @@ class ForumPost < DomainModel
     if self.forum_topic.nil?
       topic = self.build_forum_topic :subject => self.subject, :posted_by => self.posted_by,
 	                      :end_user_id => self.end_user_id, :forum_forum_id => self.forum_forum_id,
-	                      :content_type => self.content_type, :content_id => self.content_id
+	                      :content_type => self.content_type, :content_id => self.content_id, :tag_names => self.tag_names
       topic.save_content(self.end_user)
       self.forum_topic_id = topic.id
     end
