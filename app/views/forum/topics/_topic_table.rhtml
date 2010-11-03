@@ -7,6 +7,7 @@
   <td align='left' nowrap='1'><%= entry_checkbox "topic", t.id %></td>
   <td><a href='<%= posts_list_url_for(t.id) %>'><%= t.subject %></a></td>
   <td><%= t.posted_by %></td>
+  <td><%= t.url %></td>
   <td align='center'><%= t.forum_posts_count %></td>
   <td align='center'><%= t.activity_count %></td>
   <td align='center'><%= t.sticky %></td>

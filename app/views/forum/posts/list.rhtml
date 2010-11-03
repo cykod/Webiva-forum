@@ -2,10 +2,13 @@
 <%=  active_table_javascript %>
 </script>
 
-<% action_panel do |p| -%>
+<% action_panel :more => true do |p| -%>
   <%= p.link "Create a new Post", :action => 'post', :path => [@forum_category.id, @forum.id, @topic.id], :icon => 'add.gif' %>
+<% end -%>
+
+<% more_action_panel do |p| -%>
   <%= p.link "Edit Topic", :controller => '/forum/topics', :action => 'topic', :path => [@forum_category.id, @forum.id, @topic.id], :icon => 'edit.gif' %>
-  <%= p.link "Delete Topic", :controller => '/forum/topics', :action => 'delete', :path => [@forum_category.id, @forum.id, @topic.id], :icon =>'delete.gif',:right => true %>
+  <%= p.link "Delete Topic", :controller => '/forum/topics', :action => 'delete', :path => [@forum_category.id, @forum.id, @topic.id], :icon =>'delete.gif' %>
 <% end -%>
 
 

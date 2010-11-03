@@ -16,6 +16,7 @@ class Forum::TopicsController < ModuleController
                 [ hdr(:icon, '', :width=>10),
                   hdr(:string, 'forum_topics.subject', :label => 'Topics'),
                   hdr(:string, 'forum_topics.posted_by'),
+                  :permalink,
                   hdr(:number, 'forum_topics.forum_posts_count'),
                   hdr(:number, 'forum_topics.activity_count'),
                   hdr(:number, 'forum_topics.sticky'),

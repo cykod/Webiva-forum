@@ -415,7 +415,7 @@ class Forum::PageFeature < ParagraphFeature
   def add_topic_features(context, data, base='topic')
     context.h_tag(base + ':subject') { |t| truncate(t.locals.topic.subject, :length => (t.attr['length'] || 100).to_i) }
     context.h_tag(base + ':posted_by') { |t| t.locals.topic.posted_by }
-    context.link_tag(base + ':topic') { |t| "#{data[:options].forum_page_url}/#{t.locals.topic.forum_forum.url}/#{t.locals.topic.id}" }
+    context.link_tag(base + ':topic') { |t| "#{data[:options].forum_page_url}/#{t.locals.topic.forum_forum.url}/#{t.locals.topic.url}" }
     context.value_tag(base + ':posts_count') { |t| number_with_delimiter(t.locals.topic.forum_posts_count) }
     context.value_tag(base + ':replies') { |t| number_with_delimiter(t.locals.topic.forum_posts_count-1) }
     context.value_tag(base + ':activity_count') { |t| number_with_delimiter(t.locals.topic.activity_count) }
@@ -430,7 +430,7 @@ class Forum::PageFeature < ParagraphFeature
     context.expansion_tag(base + ':sticky') { |t| t.locals.topic.sticky > 0 }
 
     if data[:options] && data[:options].new_post_page_id && ! data[:options].new_post_page_id.blank?
-      context.link_tag(base + ':new_post') { |t| "#{data[:options].new_post_page_url}/#{t.locals.forum.url}/#{t.locals.topic.id}" }
+      context.link_tag(base + ':new_post') { |t| "#{data[:options].new_post_page_url}/#{t.locals.forum.url}/#{t.locals.topic.url}" }
     end
 
     context.define_user_tags(base + ':user') { |t| t.locals.user = t.locals.topic.end_user }
@@ -460,10 +460,10 @@ class Forum::PageFeature < ParagraphFeature
     context.define_user_tags(base + ':user') { |t| t.locals.user = t.locals.post.end_user }
 
     context.expansion_tag(base + ':reply') { |t| data[:options] && data[:options].new_post_page_url }
-    context.link_tag(base + ':reply:reply') { |t| "#{data[:options].new_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.id}/#{t.locals.post.id}" }
+    context.link_tag(base + ':reply:reply') { |t| "#{data[:options].new_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.url}/#{t.locals.post.id}" }
 
     context.expansion_tag(base + ':edit') { |t| myself.id == t.locals.post.end_user_id && ! t.locals.post.end_user_id.nil? && data[:options] && data[:options].edit_post_page_url }
-    context.link_tag(base + ':edit:edit') { |t| "#{data[:options].edit_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.id}/#{t.locals.post.id}" }
+    context.link_tag(base + ':edit:edit') { |t| "#{data[:options].edit_post_page_url}/#{t.locals.post.forum_forum.url}/#{t.locals.post.forum_topic.url}/#{t.locals.post.id}" }
   end
 
   def add_attachment_features(context, data, base='attachment')

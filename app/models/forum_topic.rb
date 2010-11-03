@@ -52,6 +52,10 @@ class ForumTopic < DomainModel
     @body = body
   end
 
+  def url
+    self.permalink || self.id.to_s
+  end
+
   def default_subject
     if self.forum_posts.count == 0
       self.subject
@@ -86,6 +90,18 @@ class ForumTopic < DomainModel
 	self.posted_by = self.end_user.username
       else
 	self.posted_by = self.end_user.email
+      end
+    end
+  end
+
+  def before_create
+    unless self.permalink
+      orig_permalink = SiteNode.generate_node_path(self.subject)[0...100]
+      self.permalink = orig_permalink
+      cnt = 2
+      while(self.forum_forum.forum_topics.find_by_permalink(self.permalink))
+        self.permalink = "#{orig_permalink}-#{cnt}"
+        cnt += 1
       end
     end
   end

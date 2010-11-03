@@ -90,7 +90,8 @@ class Forum::PageRenderer < ParagraphRenderer
     cache_obj = must_fetch_topic ? [ForumTopic, conn_id.to_i] : @forum
 
     result = renderer_cache(cache_obj, forum_page) do |cache|
-      @topic = @forum.forum_topics.find_by_id conn_id.to_i if must_fetch_topic
+      @topic = @forum.forum_topics.find_by_permalink conn_id if conn_id && must_fetch_topic
+      @topic ||= @forum.forum_topics.find_by_id conn_id.to_i if must_fetch_topic
 
       if @forum && ! must_fetch_topic
 	@pages, @topics = @forum.forum_topics.paginate(forum_page, :per_page => @options.topics_per_page, :order => 'sticky DESC, created_at DESC')
@@ -126,7 +127,10 @@ class Forum::PageRenderer < ParagraphRenderer
       end
 
       conn_type, conn_id = page_connection(:topic)
-      @topic = @forum.forum_topics.find_by_id conn_id if conn_type == :id && ! conn_id.blank? && @forum
+      if conn_type == :id && ! conn_id.blank? && @forum
+        @topic = @forum.forum_topics.find_by_permalink conn_id
+        @topic ||= @forum.forum_topics.find_by_id conn_id
+      end
     end
 
     if @topic
@@ -193,7 +197,10 @@ class Forum::PageRenderer < ParagraphRenderer
 	  raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
 
 	  conn_type, conn_id = page_connection(:topic)
-	  @topic = @forum.forum_topics.find_by_id conn_id if conn_type == :id && ! conn_id.blank?
+          if conn_type == :id && ! conn_id.blank?
+            @topic = @forum.forum_topics.find_by_permalink conn_id
+            @topic ||= @forum.forum_topics.find_by_id conn_id
+          end
 
           if @topic
             conn_type, conn_id = page_connection(:post)
@@ -257,9 +264,9 @@ class Forum::PageRenderer < ParagraphRenderer
 
 	    posts_page = ((@post.forum_topic.forum_posts.size-1) / @options.posts_per_page).to_i + 1
 	    if posts_page > 1
-	      posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s + '?posts_page=' + posts_page.to_s
+	      posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.url + '?posts_page=' + posts_page.to_s
 	    else
-	      posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
+	      posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.url
 	    end
 
 	    default_subscription_template_id = Forum::AdminController.module_options.subscription_template_id
@@ -304,7 +311,10 @@ class Forum::PageRenderer < ParagraphRenderer
       raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @forum
 
       conn_type, conn_id = page_connection(:topic)
-      @topic = @forum.forum_topics.find_by_id conn_id
+      unless conn_id.blank?
+        @topic = @forum.forum_topics.find_by_permalink conn_id
+        @topic ||= @forum.forum_topics.find_by_id conn_id
+      end
       raise SiteNodeEngine::MissingPageException.new( site_node, language ) unless @topic
 
       conn_type, conn_id = page_connection(:post)
@@ -313,7 +323,7 @@ class Forum::PageRenderer < ParagraphRenderer
     end
 
     if ! editor?
-      posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.id.to_s
+      posts_url = @options.forum_page_url + '/' + @forum.url + '/' + @post.forum_topic.url
       return redirect_paragraph posts_url if @post.end_user_id.nil? ||  myself.id != @post.end_user_id
 
       if request.post? && params[:post]
