@@ -266,7 +266,7 @@ describe Forum::PageRenderer, :type => :controller do
       @post.subject.should == 'My Test Subject'
       @post.forum_topic.subject.should == 'My Test Subject'
 
-      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.url)
     end
 
     it "should be able to create a new post" do
@@ -285,7 +285,7 @@ describe Forum::PageRenderer, :type => :controller do
       @post.body.should == 'My Test Post'
       @post.subject.should == @topic.default_subject
 
-      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.url)
     end
 
     it "should be able to create a new post and set end user name" do
@@ -313,7 +313,7 @@ describe Forum::PageRenderer, :type => :controller do
       @myself.last_name.should == 'Name'
       @myself.full_name.should == 'Test Name'
 
-      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.url)
     end
 
     it "should be able to display recent topics form editor mode" do
@@ -431,7 +431,7 @@ describe Forum::PageRenderer, :type => :controller do
       @post.forum_topic.content_type.should == 'content_test'
       @post.forum_topic.content_id.should == 1
 
-      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.url)
     end
 
     it "should be able to display edit post form" do
@@ -456,7 +456,7 @@ describe Forum::PageRenderer, :type => :controller do
 
       renderer_get @rnd
 
-      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.url)
     end
 
     it "should be able to edit a post" do
@@ -472,7 +472,7 @@ describe Forum::PageRenderer, :type => :controller do
       @post.reload
       @post.body.should == 'New Body'
 
-      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.url)
     end
 
     it "should be able to create a new topic and subscribe to it" do
@@ -500,7 +500,7 @@ describe Forum::PageRenderer, :type => :controller do
       @subscription = ForumSubscription.user_subscriptions(@myself).find_by_forum_topic_id(@post.forum_topic.id)
       @subscription.should_not be_nil
 
-      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.id.to_s)
+      @rnd.should redirect_paragraph('/topic/' + @forum.url + '/' + @post.forum_topic.url)
     end
   end
 end
