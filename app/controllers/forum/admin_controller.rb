@@ -30,6 +30,7 @@ class Forum::AdminController < ModuleController
   register_action '/forum/new_topic', :description => 'Forum New Topic', :level => 3
 
   register_handler :structure, :wizard, "Forum::WizardController"
+  register_handler :webiva, :widget, "ForumWidget"
 
   public     
 

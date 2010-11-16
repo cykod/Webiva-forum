@@ -145,4 +145,8 @@ class ForumTopic < DomainModel
     str += " #{self.tag_names}"
     str
   end
+
+  def admin_url
+    self.forum_forum.content_admin_url self.id
+  end
 end
