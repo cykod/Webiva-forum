@@ -11,8 +11,8 @@
   <td align='center'><%= t.forum_posts_count %></td>
   <td align='center'><%= t.activity_count %></td>
   <td align='center'><%= t.sticky %></td>
-  <td align='center'><%= t.updated_at ? t.updated_at.localize(DEFAULT_DATETIME_FORMAT.t) : '-' %></td>
-  <td align='center'><%= t.created_at ? t.created_at.localize(DEFAULT_DATETIME_FORMAT.t) : '-' %></td>
+  <td align='center'><%= t.updated_at ? t.updated_at.localize(Configuration.datetime_format) : '-' %></td>
+  <td align='center'><%= t.created_at ? t.created_at.localize(Configuration.datetime_format) : '-' %></td>
 </tr>
 
 

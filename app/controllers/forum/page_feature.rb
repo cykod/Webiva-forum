@@ -402,9 +402,9 @@ class Forum::PageFeature < ParagraphFeature
     context.h_tag(base + ':description') { |t| t.locals.forum.description }
     context.image_tag(base + ':image') { |t| t.locals.forum.image }
     context.link_tag(base + ':forum') { |t| "#{data[:options].forum_page_url}/#{t.locals.forum.url}" }
-    context.date_tag(base + ':updated_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.forum.updated_at }
+    context.datetime_tag(base + ':updated_at') { |t| t.locals.forum.updated_at }
     context.value_tag(base + ':updated_ago') { |t| time_ago_in_words(t.locals.forum.updated_at) }
-    context.date_tag(base + ':created_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.forum.created_at }
+    context.datetime_tag(base + ':created_at') { |t| t.locals.forum.created_at }
     context.value_tag(base + ':created_ago') { |t| time_ago_in_words(t.locals.forum.created_at) }
     context.value_tag(base + ':topics_count') { |t| number_with_delimiter(t.locals.forum.forum_topics_count) }
     context.value_tag(base + ':topics_count_topics') { |t| pluralize(t.locals.forum.forum_topics_count, 'topic') }
@@ -427,9 +427,9 @@ class Forum::PageFeature < ParagraphFeature
     context.value_tag(base + ':activity_count_posts') { |t| pluralize(t.locals.topic.activity_count, 'post') }
     context.value_tag(base + ':views') { |t| number_with_delimiter(t.locals.topic.views) }
     context.value_tag(base + ':views_views') { |t| pluralize(t.locals.topic.views, 'view') }
-    context.date_tag(base + ':updated_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.topic.updated_at }
+    context.datetime_tag(base + ':updated_at') { |t| t.locals.topic.updated_at }
     context.value_tag(base + ':updated_ago') { |t| time_ago_in_words(t.locals.topic.updated_at) }
-    context.date_tag(base + ':created_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.topic.created_at }
+    context.datetime_tag(base + ':created_at') { |t| t.locals.topic.created_at }
     context.value_tag(base + ':created_ago') { |t| time_ago_in_words(t.locals.topic.created_at) }
     context.expansion_tag(base + ':sticky') { |t| t.locals.topic.sticky > 0 }
 
@@ -456,9 +456,9 @@ class Forum::PageFeature < ParagraphFeature
       add_attachment_features(context, data, base + ':attachment')
 
     context.expansion_tag(base + ':edited') { |t| t.locals.post.edited_at }
-    context.date_tag(base + ':edited_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.post.edited_at }
+    context.datetime_tag(base + ':edited_at') { |t| t.locals.post.edited_at }
     context.value_tag(base + ':edited_ago') { |t| time_ago_in_words(t.locals.post.edited_at) }
-    context.date_tag(base + ':posted_at',DEFAULT_DATETIME_FORMAT.t) { |t| t.locals.post.posted_at }
+    context.datetime_tag(base + ':posted_at') { |t| t.locals.post.posted_at }
     context.value_tag(base + ':posted_ago') { |t| time_ago_in_words(t.locals.post.posted_at) }
 
     context.define_user_tags(base + ':user') { |t| t.locals.user = t.locals.post.end_user }
